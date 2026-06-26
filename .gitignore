@@ -1,0 +1,16 @@
+#Environment Variables
+.env
+
+#Node Modules
+node_modules
+
+#Ide
+.idea
+
+#Expo
+.expo
+dist
+
+#Agents
+.agents
+AGENTS.md

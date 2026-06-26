@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "SavingsApp",
+    "slug": "savingsapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.savingsapp.app",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Allow SavingsApp to use Face ID for authentication"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.savingsapp.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "scheme": "savingsapp",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "9c8e90e5-bd07-4455-b4a3-cf5c090cc1ab"
+      }
+    },
+    "owner": "znenn"
+  }
+}
