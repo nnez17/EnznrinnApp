@@ -46,14 +46,14 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({ balance, style }) => {
         <View style={styles.details}>
           <View style={styles.detailItem}>
             <Ionicons name="arrow-down-circle" size={18} color="#4CD964" />
-            <Text style={styles.detailLabel}>Pemasukan</Text>
-            <Text style={[styles.detailValue, { color: '#4CD964' }]}>{formatCurrency(balance.totalIncome)}</Text>
+            <Text style={styles.detailLabel}>Pemasukan Hari Ini</Text>
+            <Text style={[styles.detailValue, { color: '#4CD964' }]}>{formatCurrency(balance.todayIncome)}</Text>
           </View>
           <View style={styles.detailDivider} />
           <View style={styles.detailItem}>
             <Ionicons name="arrow-up-circle" size={18} color="#FF6B6B" />
-            <Text style={styles.detailLabel}>Pengeluaran</Text>
-            <Text style={[styles.detailValue, { color: '#FF6B6B' }]}>{formatCurrency(balance.totalExpense)}</Text>
+            <Text style={styles.detailLabel}>Pengeluaran Hari Ini</Text>
+            <Text style={[styles.detailValue, { color: '#FF6B6B' }]}>{formatCurrency(balance.todayExpense)}</Text>
           </View>
         </View>
       </View>

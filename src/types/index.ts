@@ -15,6 +15,8 @@ export interface Balance {
   current: number;
   totalIncome: number;
   totalExpense: number;
+  todayIncome: number;
+  todayExpense: number;
 }
 
 export interface Target {
@@ -25,7 +27,7 @@ export interface Target {
   createdAt: string;
 }
 
-export type ThemeMode = 'system' | 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark';
 
 export interface AppState {
   transactions: Transaction[];
@@ -34,6 +36,7 @@ export interface AppState {
   currentUser: UserName;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isOnline: boolean;
   lastSynced: number | null;
   error: string | null;
   themeMode: ThemeMode;

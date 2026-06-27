@@ -10,6 +10,7 @@ node_modules
 #Expo
 .expo
 dist
+eas.json
 
 #Agents
 .agents

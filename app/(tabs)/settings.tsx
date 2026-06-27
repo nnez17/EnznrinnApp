@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, Alert,
+  View, Text, ScrollView, StyleSheet,
   TouchableOpacity,
 } from 'react-native';
 import { useSavings } from '@/context/SavingsContext';
 import { Colors } from '@/context/colors';
 import { useTheme } from '@/context/ThemeContext';
 import { Button } from '@/components/Button';
+import { ActionSheet } from '@/components/ActionSheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { hasFirebaseConfig } from '@/config/env';
 
@@ -48,28 +50,33 @@ function SettingRow({
   );
 }
 
-const themeOptions: { key: 'system' | 'light' | 'dark'; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
-  { key: 'system', icon: 'phone-portrait-outline', label: 'Sistem' },
+const themeOptions: { key: 'light' | 'dark'; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
   { key: 'light', icon: 'sunny-outline', label: 'Terang' },
   { key: 'dark', icon: 'moon-outline', label: 'Gelap' },
 ];
 
 export default function SettingsScreen() {
+  const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const { state, syncFromSheet, setThemeMode } = useSavings();
+  const { state, syncFromSheet, setThemeMode, checkConnection } = useSavings();
   const isConnected = hasFirebaseConfig;
   const [syncing, setSyncing] = React.useState(false);
+  const [errorSheet, setErrorSheet] = React.useState<{ visible: boolean; message: string }>({ visible: false, message: '' });
+
+  useEffect(() => {
+    checkConnection();
+  }, []);
 
   const handleSync = async () => {
     setSyncing(true);
     try { await syncFromSheet(); }
-    catch (e) { Alert.alert('Error', e instanceof Error ? e.message : 'Gagal sinkronisasi'); }
+    catch (e) { setErrorSheet({ visible: true, message: e instanceof Error ? e.message : 'Gagal sinkronisasi' }); }
     finally { setSyncing(false); }
   };
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Text style={[styles.title, { color: theme.textPrimary }]}>Pengaturan</Text>
       </View>
 
@@ -83,9 +90,9 @@ export default function SettingsScreen() {
           isLast={false}
         />
         <SettingRow
-          icon="checkmark-circle-outline"
+          icon={state.isOnline ? "checkmark-circle-outline" : "close-circle-outline"}
           label="Status"
-          value={isConnected ? 'Tersambung' : 'Belum dikonfigurasi'}
+          value={!isConnected ? 'Belum dikonfigurasi' : state.isOnline ? 'Online' : 'Offline'}
           theme={theme}
           isLast={true}
         />
@@ -147,6 +154,15 @@ export default function SettingsScreen() {
           Dibuat oleh Noval dengan ❤️ untuk pacarku Kharin
         </Text>
       </View>
+      <ActionSheet
+        visible={errorSheet.visible}
+        title="Error"
+        message={errorSheet.message}
+        options={[
+          { text: 'OK', style: 'cancel', onPress: () => setErrorSheet({ visible: false, message: '' }) },
+        ]}
+        onClose={() => setErrorSheet({ visible: false, message: '' })}
+      />
     </ScrollView>
   );
 }
@@ -159,7 +175,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   header: {
-    paddingTop: 8,
     marginBottom: 8,
   },
   title: {

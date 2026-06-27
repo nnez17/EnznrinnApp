@@ -3,6 +3,7 @@ import { Transaction, Balance, Target, AppState, UserName, ThemeMode } from '@/t
 import { firestoreService } from '@/services/firestore';
 import { hasFirebaseConfig } from '@/config/env';
 import { generateId, toISOString } from '@/utils/dateUtils';
+import { startOfDay } from 'date-fns';
 
 type Action =
   | { type: 'SET_LOADING'; payload: boolean }
@@ -13,20 +14,22 @@ type Action =
   | { type: 'SET_BALANCE'; payload: Balance }
   | { type: 'SET_TARGET'; payload: Target | null }
   | { type: 'SET_LAST_SYNCED'; payload: number }
+  | { type: 'SET_ONLINE'; payload: boolean }
   | { type: 'SWITCH_USER'; payload: UserName }
   | { type: 'SET_THEME_MODE'; payload: ThemeMode }
   | { type: 'RESET_STATE' };
 
 const initialState: AppState = {
   transactions: [],
-  balance: { current: 0, totalIncome: 0, totalExpense: 0 },
+  balance: { current: 0, totalIncome: 0, totalExpense: 0, todayIncome: 0, todayExpense: 0 },
   target: null,
   currentUser: 'Noval',
   isLoading: false,
   isAuthenticated: hasFirebaseConfig,
+  isOnline: false,
   lastSynced: null,
   error: null,
-  themeMode: 'system',
+  themeMode: 'light',
 };
 
 function reducer(state: AppState, action: Action): AppState {
@@ -51,6 +54,8 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, target: action.payload };
     case 'SET_LAST_SYNCED':
       return { ...state, lastSynced: action.payload };
+    case 'SET_ONLINE':
+      return { ...state, isOnline: action.payload };
     case 'SWITCH_USER':
       return { ...state, currentUser: action.payload };
     case 'SET_THEME_MODE':
@@ -72,6 +77,7 @@ const SavingsContext = createContext<{
   updateTarget: (updates: { targetAmount?: number; deadline?: string }) => Promise<void>;
   deleteTargetFromSheet: () => Promise<void>;
   syncFromSheet: () => Promise<void>;
+  checkConnection: () => Promise<void>;
   clearAllData: () => Promise<void>;
   switchUser: (user: UserName) => Promise<void>;
   setThemeMode: (mode: ThemeMode) => void;
@@ -87,10 +93,21 @@ export const SavingsProvider: React.FC<{ children: ReactNode }> = ({ children })
     const totalExpense = transactions
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
+
+    const todayStart = startOfDay(new Date()).getTime();
+    const todayIncome = transactions
+      .filter(t => t.type === 'income' && new Date(t.date).getTime() >= todayStart)
+      .reduce((sum, t) => sum + t.amount, 0);
+    const todayExpense = transactions
+      .filter(t => t.type === 'expense' && new Date(t.date).getTime() >= todayStart)
+      .reduce((sum, t) => sum + t.amount, 0);
+
     return {
       current: totalIncome - totalExpense,
       totalIncome,
       totalExpense,
+      todayIncome,
+      todayExpense,
     };
   }, []);
 
@@ -110,14 +127,18 @@ export const SavingsProvider: React.FC<{ children: ReactNode }> = ({ children })
       dispatch({ type: 'SET_BALANCE', payload: balance });
       dispatch({ type: 'SET_TARGET', payload: target });
       dispatch({ type: 'SET_LAST_SYNCED', payload: Date.now() });
+      dispatch({ type: 'SET_ONLINE', payload: true });
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Sync gagal';
       dispatch({ type: 'SET_ERROR', payload: msg });
+      dispatch({ type: 'SET_ONLINE', payload: false });
     }
   }, [calculateBalance]);
 
   const addTransaction = useCallback(async (type: 'income' | 'expense', amount: number, note: string, user: UserName) => {
     dispatch({ type: 'SET_ERROR', payload: null });
+
+    const runningBalance = state.balance.current + (type === 'income' ? amount : -amount);
 
     const newTransaction: Transaction = {
       id: generateId(),
@@ -126,21 +147,23 @@ export const SavingsProvider: React.FC<{ children: ReactNode }> = ({ children })
       amount,
       note,
       date: toISOString(),
-      balance: 0,
+      balance: runningBalance,
     };
 
     try {
       await firestoreService.appendTransaction(newTransaction);
+      dispatch({ type: 'SET_ONLINE', payload: true });
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Gagal menyimpan ke Firestore';
       dispatch({ type: 'SET_ERROR', payload: msg });
+      dispatch({ type: 'SET_ONLINE', payload: false });
       return;
     }
 
     dispatch({ type: 'ADD_TRANSACTION', payload: newTransaction });
     const newBalanceState = calculateBalance([newTransaction, ...state.transactions]);
     dispatch({ type: 'SET_BALANCE', payload: newBalanceState });
-  }, [state.transactions, calculateBalance]);
+  }, [state.transactions, state.balance, calculateBalance]);
 
   const updateTransaction = useCallback(async (id: string, updates: { amount?: number; note?: string; user?: UserName }) => {
     dispatch({ type: 'SET_ERROR', payload: null });
@@ -215,6 +238,19 @@ export const SavingsProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   }, []);
 
+  const checkConnection = useCallback(async () => {
+    if (!hasFirebaseConfig) {
+      dispatch({ type: 'SET_ONLINE', payload: false });
+      return;
+    }
+    try {
+      await firestoreService.loadTransactions();
+      dispatch({ type: 'SET_ONLINE', payload: true });
+    } catch {
+      dispatch({ type: 'SET_ONLINE', payload: false });
+    }
+  }, []);
+
   const switchUser = useCallback(async (user: UserName) => {
     dispatch({ type: 'SWITCH_USER', payload: user });
   }, []);
@@ -239,6 +275,7 @@ export const SavingsProvider: React.FC<{ children: ReactNode }> = ({ children })
         updateTarget,
         deleteTargetFromSheet,
         syncFromSheet,
+        checkConnection,
         clearAllData,
         switchUser,
         setThemeMode,

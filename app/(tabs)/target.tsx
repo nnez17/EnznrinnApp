@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, Alert,
+  View, Text, ScrollView, StyleSheet,
   Modal, Pressable, KeyboardAvoidingView, Platform,
   TouchableOpacity,
 } from 'react-native';
@@ -12,6 +12,8 @@ import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { TargetProgress } from '@/components/TargetProgress';
+import { ActionSheet } from '@/components/ActionSheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 function getTomorrow(): Date {
@@ -34,6 +36,7 @@ function isValidDeadline(date: Date): boolean {
 
 
 export default function TargetScreen() {
+  const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { state, setTarget: setTargetToSheet, updateTarget, deleteTargetFromSheet } = useSavings();
   const target = state.target;
@@ -43,10 +46,12 @@ export default function TargetScreen() {
   const [targetAmount, setTargetAmount] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showDeleteSheet, setShowDeleteSheet] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
+  const [errorSheet, setErrorSheet] = useState<{ visible: boolean; message: string }>({ visible: false, message: '' });
 
   const daysLeft = target ? getDaysUntil(target.deadline) : 0;
   const completed = target ? state.balance.current >= target.targetAmount : false;
@@ -73,15 +78,15 @@ export default function TargetScreen() {
   const handleSetTarget = async () => {
     const amount = parseFormattedNumber(targetAmount);
     if (!amount || amount <= 0) {
-      Alert.alert('Error', 'Masukkan target yang valid');
+      setErrorSheet({ visible: true, message: 'Masukkan target yang valid' });
       return;
     }
     if (!selectedDate) {
-      Alert.alert('Error', 'Pilih batas waktu');
+      setErrorSheet({ visible: true, message: 'Pilih batas waktu' });
       return;
     }
     if (!isValidDeadline(selectedDate)) {
-      Alert.alert('Error', 'Batas waktu harus minimal besok');
+      setErrorSheet({ visible: true, message: 'Batas waktu harus minimal besok' });
       return;
     }
 
@@ -96,15 +101,12 @@ export default function TargetScreen() {
       setTargetAmount('');
       setSelectedDate(null);
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Gagal menyimpan target');
+      setErrorSheet({ visible: true, message: e instanceof Error ? e.message : 'Gagal menyimpan target' });
     }
   };
 
   const handleClearTarget = () => {
-    Alert.alert('Hapus Target', 'Yakin ingin menghapus target?', [
-      { text: 'Batal', style: 'cancel' },
-      { text: 'Hapus', style: 'destructive', onPress: () => deleteTargetFromSheet().catch(() => {}) },
-    ]);
+    setShowDeleteSheet(true);
   };
 
   return (
@@ -113,7 +115,7 @@ export default function TargetScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
           <Text style={[styles.title, { color: theme.textPrimary }]}>Target</Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{target ? 'Progress tabunganmu' : 'Buat target tabungan'}</Text>
         </View>
@@ -173,7 +175,7 @@ export default function TargetScreen() {
         )}
       </ScrollView>
 
-      <Modal visible={showModal} transparent animationType="slide" onRequestClose={() => setShowModal(false)}>
+      <Modal visible={showModal} transparent animationType="slide" statusBarTranslucent onRequestClose={() => setShowModal(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setShowModal(false)}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <Pressable style={[styles.modalContent, { backgroundColor: theme.surfaceElevated }]} onPress={() => {}}>
@@ -278,6 +280,26 @@ export default function TargetScreen() {
           </KeyboardAvoidingView>
         </Pressable>
       </Modal>
+
+      <ActionSheet
+        visible={showDeleteSheet}
+        title="Hapus Target"
+        message="Yakin ingin menghapus target?"
+        options={[
+          { text: 'Hapus', style: 'destructive', onPress: () => deleteTargetFromSheet().catch(() => {}) },
+          { text: 'Batal', style: 'cancel' },
+        ]}
+        onClose={() => setShowDeleteSheet(false)}
+      />
+      <ActionSheet
+        visible={errorSheet.visible}
+        title="Error"
+        message={errorSheet.message}
+        options={[
+          { text: 'OK', style: 'cancel', onPress: () => setErrorSheet({ visible: false, message: '' }) },
+        ]}
+        onClose={() => setErrorSheet({ visible: false, message: '' })}
+      />
     </View>
   );
 }
@@ -289,9 +311,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     gap: 16,
   },
-  header: {
-    paddingTop: 8,
-  },
+  header: {},
   title: {
     fontSize: 30,
     fontWeight: '700',

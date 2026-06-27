@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, RefreshControl, StyleSheet,
-  Alert, Keyboard, Modal, Pressable, KeyboardAvoidingView,
+  Keyboard, Modal, Pressable, KeyboardAvoidingView,
   Platform, TouchableOpacity,
 } from 'react-native';
 import { useSavings } from '@/context/SavingsContext';
@@ -14,8 +14,10 @@ import { SyncButton } from '@/components/SyncButton';
 import { Card } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { TransactionRow } from '@/components/TransactionRow';
+import { ActionSheet } from '@/components/ActionSheet';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { UserName } from '@/types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, FadeInDown } from 'react-native-reanimated';
 
 
@@ -34,7 +36,11 @@ export default function HomeScreen() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [insufficientBalance, setInsufficientBalance] = useState(false);
+  const [insufficientAmount, setInsufficientAmount] = useState(0);
+  const [errorSheet, setErrorSheet] = useState<{ visible: boolean; message: string }>({ visible: false, message: '' });
 
+  const insets = useSafeAreaInsets();
   const headerAnim = useSharedValue(0);
   useEffect(() => {
     headerAnim.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
@@ -48,8 +54,19 @@ export default function HomeScreen() {
   const handleAddTransaction = async (type: 'income' | 'expense') => {
     const numAmount = parseFormattedNumber(amount);
     if (!numAmount || numAmount <= 0) {
-      Alert.alert('Error', 'Masukkan jumlah yang valid');
+      setErrorSheet({ visible: true, message: 'Masukkan jumlah yang valid' });
       return;
+    }
+    if (type === 'expense') {
+      if (!note.trim()) {
+        setErrorSheet({ visible: true, message: 'Catatan pemakaian wajib diisi' });
+        return;
+      }
+      if (numAmount > state.balance.current) {
+        setInsufficientAmount(numAmount);
+        setInsufficientBalance(true);
+        return;
+      }
     }
     setIsSaving(true);
     await addTransaction(type, numAmount, note, state.currentUser);
@@ -82,7 +99,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View style={headerStyle}>
-          <View style={styles.header}>
+          <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
             <View>
               <Text style={[styles.greeting, { color: theme.textPrimary }]}>Tabungan</Text>
               <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Pantau keuanganmu</Text>
@@ -145,7 +162,7 @@ export default function HomeScreen() {
         )}
       </ScrollView>
 
-      <Modal visible={!!modalType} transparent animationType="slide" onRequestClose={() => setModalType(null)}>
+      <Modal visible={!!modalType} transparent animationType="slide" statusBarTranslucent onRequestClose={() => setModalType(null)}>
         <Pressable style={styles.modalOverlay} onPress={() => setModalType(null)}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <Pressable style={[styles.modalContent, { backgroundColor: theme.surfaceElevated }]} onPress={() => {}}>
@@ -178,12 +195,20 @@ export default function HomeScreen() {
                 onChangeText={setAmount}
               />
               <Input
-                label="Catatan (opsional)"
+                label={isIncome ? 'Catatan (opsional)' : 'Catatan'}
                 placeholder={isIncome ? 'Gaji bulanan' : 'Belanja'}
                 leftIcon="create-outline"
                 value={note}
                 onChangeText={setNote}
               />
+              {!isIncome && previewAmount > 0 && (
+                <View style={styles.sisaRow}>
+                  <Text style={[styles.sisaLabel, { color: theme.textSecondary }]}>Sisa saldo</Text>
+                  <Text style={[styles.sisaValue, { color: previewAmount <= state.balance.current ? theme.textPrimary : theme.error }]}>
+                    {formatCurrency(state.balance.current - previewAmount)}
+                  </Text>
+                </View>
+              )}
               <View style={styles.modalUserRow}>
                 <Text style={[styles.modalUserLabel, { color: theme.textSecondary }]}>Atas nama</Text>
                 <View style={styles.modalUserToggle}>
@@ -224,6 +249,25 @@ export default function HomeScreen() {
           </KeyboardAvoidingView>
         </Pressable>
       </Modal>
+
+      <ActionSheet
+        visible={insufficientBalance}
+        title="Saldo Tidak Cukup"
+        message={`Saldo saat ini ${formatCurrency(state.balance.current)}, tidak cukup untuk pengeluaran ${formatCurrency(insufficientAmount)}`}
+        options={[
+          { text: 'OK', style: 'cancel', onPress: () => setInsufficientBalance(false) },
+        ]}
+        onClose={() => setInsufficientBalance(false)}
+      />
+      <ActionSheet
+        visible={errorSheet.visible}
+        title="Error"
+        message={errorSheet.message}
+        options={[
+          { text: 'OK', style: 'cancel', onPress: () => setErrorSheet({ visible: false, message: '' }) },
+        ]}
+        onClose={() => setErrorSheet({ visible: false, message: '' })}
+      />
     </View>
   );
 }
@@ -239,7 +283,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    paddingTop: 8,
   },
   greeting: {
     fontSize: 30,
@@ -359,6 +402,21 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     fontFamily: 'SFProRounded-Bold',
+  },
+  sisaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+  },
+  sisaLabel: {
+    fontSize: 13,
+    fontFamily: 'SFProRounded-Regular',
+  },
+  sisaValue: {
+    fontSize: 15,
+    fontWeight: '600',
+    fontFamily: 'SFProRounded-Semibold',
   },
   modalUserRow: {
     flexDirection: 'row',
