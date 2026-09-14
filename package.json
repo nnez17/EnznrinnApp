@@ -3,8 +3,8 @@
   "version": "2.0.0",
   "main": "expo-router/entry",
   "scripts": {
-    "dev": "sh scripts/dev.sh",
-    "start:expo": "expo start",
+    "dev": "go -C backend run ./cmd/server && expo start",
+    "dev:expo": "expo start",
     "dev:api": "go -C backend run ./cmd/server",
     "db:migrate": "go -C backend run ./cmd/migrate",
     "android": "sh scripts/dev.sh --android",
@@ -55,6 +55,7 @@
   "devDependencies": {
     "@babel/core": "^7.24.0",
     "@tailwindcss/postcss": "4.1.12",
+    "concurrently": "^10.0.5",
     "eslint": "^8.57.0",
     "eslint-config-expo": "~57.0.2",
     "postcss": "8.5.28",
