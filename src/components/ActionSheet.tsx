@@ -21,23 +21,27 @@ export const ActionSheet: React.FC<ActionSheetProps> = ({ visible, title, messag
 
   return (
     <Modal visible={visible} transparent animationType="slide" statusBarTranslucent onRequestClose={onClose}>
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={[styles.sheet, { backgroundColor: theme.surfaceElevated }]} onPress={() => {}}>
-          <View style={[styles.handle, { backgroundColor: theme.textTertiary }]} />
+      <Pressable className="flex-1 bg-[rgba(0,0,0,0.4)] justify-end" onPress={onClose}>
+        <Pressable
+          className="rounded-t-[20px] pt-2"
+          style={{ backgroundColor: theme.surfaceElevated, paddingBottom: Platform.OS === 'ios' ? 34 : 20 }}
+          onPress={() => {}}
+        >
+          <View className="w-9 h-[5px] rounded-full self-center mb-2" style={{ backgroundColor: theme.textTertiary }} />
 
           {(title || message) && (
-            <View style={styles.header}>
-              {title && <Text style={[styles.title, { color: theme.textPrimary }]}>{title}</Text>}
-              {message && <Text style={[styles.message, { color: theme.textSecondary }]}>{message}</Text>}
+            <View className="items-center px-6 py-3">
+              {title && <Text className="text-[17px] font-bold font-rounded-bold text-center" style={{ color: theme.textPrimary }}>{title}</Text>}
+              {message && <Text className="text-[13px] font-rounded text-center mt-1 leading-[18px]" style={{ color: theme.textSecondary }}>{message}</Text>}
             </View>
           )}
 
-          <View style={styles.optionsContainer}>
+          <View className="px-3 pt-1">
             {options.map((opt, i) => (
               <Pressable
                 key={i}
+                className="py-4 items-center justify-center"
                 style={[
-                  styles.option,
                   { borderTopWidth: i > 0 ? 0.5 : 0, borderTopColor: theme.separator },
                   opt.style === 'cancel' && { marginTop: 8, borderRadius: 14, backgroundColor: theme.surface },
                 ]}
@@ -46,11 +50,10 @@ export const ActionSheet: React.FC<ActionSheetProps> = ({ visible, title, messag
                   setTimeout(() => opt.onPress?.(), 200);
                 }}
               >
-                <Text style={[
-                  styles.optionText,
-                  { color: opt.style === 'destructive' ? '#FF3B30' : theme.primary },
-                  opt.style === 'cancel' && { fontWeight: '600' },
-                ]}>
+                <Text
+                  className={`text-[17px] font-rounded-semibold ${opt.style === 'cancel' ? 'font-semibold' : ''}`}
+                  style={{ color: opt.style === 'destructive' ? '#FF3B30' : theme.primary }}
+                >
                   {opt.text}
                 </Text>
               </Pressable>
@@ -61,55 +64,3 @@ export const ActionSheet: React.FC<ActionSheetProps> = ({ visible, title, messag
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
-    paddingTop: 8,
-  },
-  handle: {
-    width: 36,
-    height: 5,
-    borderRadius: 2.5,
-    alignSelf: 'center',
-    marginBottom: 8,
-  },
-  header: {
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-  },
-  title: {
-    fontSize: 17,
-    fontWeight: '700',
-    fontFamily: 'SFProRounded-Bold',
-    textAlign: 'center',
-  },
-  message: {
-    fontSize: 13,
-    fontFamily: 'SFProRounded-Regular',
-    textAlign: 'center',
-    marginTop: 4,
-    lineHeight: 18,
-  },
-  optionsContainer: {
-    paddingHorizontal: 12,
-    paddingTop: 4,
-  },
-  option: {
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  optionText: {
-    fontSize: 17,
-    fontFamily: 'SFProRounded-Semibold',
-  },
-});

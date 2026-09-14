@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, ScrollView, RefreshControl, StyleSheet,
+  View, Text, ScrollView, RefreshControl,
   Keyboard, Modal, Pressable, KeyboardAvoidingView,
   Platform, TouchableOpacity,
 } from 'react-native';
 import { useSavings } from '@/context/SavingsContext';
-import { Colors } from '@/context/colors';
 import { useTheme } from '@/context/ThemeContext';
 import { formatCurrency, parseFormattedNumber, formatNumber } from '@/utils/formatCurrency';
 import { BalanceCard } from '@/components/BalanceCard';
@@ -19,6 +18,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { UserName } from '@/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, FadeInDown } from 'react-native-reanimated';
+import { router } from 'expo-router';
 
 
 
@@ -27,7 +27,7 @@ const userConfig = {
   Kharin: { label: 'Kharin', color: '#FF2D55', icon: 'woman' as const },
 };
 
-export default function HomeScreen() {
+export default function DashboardScreen() {
   const theme = useTheme();
   const { state, addTransaction, syncFromSheet, switchUser } = useSavings();
   const [modalType, setModalType] = useState<'income' | 'expense' | null>(null);
@@ -44,6 +44,10 @@ export default function HomeScreen() {
   const headerAnim = useSharedValue(0);
   useEffect(() => {
     headerAnim.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
+  }, []);
+
+  useEffect(() => {
+    syncFromSheet();
   }, []);
 
   const headerStyle = useAnimatedStyle(() => ({
@@ -89,70 +93,91 @@ export default function HomeScreen() {
   const previewAmount = parseFormattedNumber(amount);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View className="flex-1" style={{ backgroundColor: theme.background }}>
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleSync} tintColor={theme.primary} />
         }
-        contentContainerStyle={styles.content}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, gap: 14 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         <Animated.View style={headerStyle}>
-          <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+          <View className="flex-row justify-between items-start" style={{ paddingTop: insets.top + 12 }}>
             <View>
-              <Text style={[styles.greeting, { color: theme.textPrimary }]}>Tabungan</Text>
-              <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Pantau keuanganmu</Text>
+              <Text className="text-[30px] font-bold font-rounded-bold tracking-[-0.5px]" style={{ color: theme.textPrimary }}>Tabungan</Text>
+              <Text className="text-[15px] mt-0.5 font-rounded" style={{ color: theme.textSecondary }}>Pantau keuanganmu</Text>
             </View>
             <SyncButton onPress={handleSync} isSyncing={isSyncing} lastSynced={state.lastSynced} />
           </View>
         </Animated.View>
 
+        <View className="flex-row gap-2.5">
+          <TouchableOpacity
+            onPress={() => router.push('/(tabs)/(tabungan)/riwayat')}
+            className="flex-row items-center gap-1.5 py-2.5 px-4 rounded-xl border flex-1 justify-center"
+            style={{ backgroundColor: theme.surface, borderColor: theme.border }}
+          >
+            <Ionicons name="time-outline" size={18} color={theme.primary} />
+            <Text className="text-sm font-semibold font-rounded-semibold" style={{ color: theme.textPrimary }}>Riwayat</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push('/(tabs)/(tabungan)/target')}
+            className="flex-row items-center gap-1.5 py-2.5 px-4 rounded-xl border flex-1 justify-center"
+            style={{ backgroundColor: theme.surface, borderColor: theme.border }}
+          >
+            <Ionicons name="flag-outline" size={18} color={theme.primary} />
+            <Text className="text-sm font-semibold font-rounded-semibold" style={{ color: theme.textPrimary }}>Target</Text>
+          </TouchableOpacity>
+        </View>
+
         {state.error && (
-          <Card style={{ ...styles.errorBanner, backgroundColor: theme.errorLight }} padding="medium">
+          <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: theme.errorLight }} padding="medium">
             <Ionicons name="alert-circle-outline" size={18} color={theme.error} />
-            <Text style={[styles.errorText, { color: theme.error }]}>{state.error}</Text>
+            <Text className="flex-1 text-[13px] font-rounded-medium" style={{ color: theme.error }}>{state.error}</Text>
           </Card>
         )}
 
         <BalanceCard balance={state.balance} />
 
-        <View style={styles.quickActions}>
+        <View className="flex-row gap-3">
           <Button
             title="Nabung"
             variant="primary"
             leftIcon={<Ionicons name="add-circle" size={20} color="#FFF" />}
             onPress={() => setModalType('income')}
-            style={styles.quickButton}
+            style={{ flex: 1 }}
           />
           <Button
             title="Pakai"
             variant="outline"
             leftIcon={<Ionicons name="remove-circle" size={20} color={theme.primary} />}
             onPress={() => setModalType('expense')}
-            style={styles.quickButton}
+            style={{ flex: 1 }}
           />
         </View>
 
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Transaksi Terbaru</Text>
+        <View className="flex-row justify-between items-center mt-1">
+          <Text className="text-lg font-semibold font-rounded-semibold" style={{ color: theme.textPrimary }}>Transaksi Terbaru</Text>
           {state.transactions.length > 0 && (
-            <Text style={[styles.sectionCount, { color: theme.textSecondary }]}>
-              {state.transactions.length} transaksi
-            </Text>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/(tabungan)/riwayat')}>
+              <Text className="text-[13px] font-rounded" style={{ color: theme.primary }}>
+                Lihat semua
+              </Text>
+            </TouchableOpacity>
           )}
         </View>
 
         {state.transactions.length === 0 ? (
-          <Card style={styles.emptyState} padding="large">
-            <Ionicons name="receipt-outline" size={44} color={theme.textTertiary} style={styles.emptyIcon} />
-            <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>Belum ada transaksi</Text>
-            <Text style={[styles.emptySubtitle, { color: theme.textSecondary }]}>
+          <Card style={{ alignItems: 'center', marginTop: 16 }} padding="large">
+            <Ionicons name="receipt-outline" size={44} color={theme.textTertiary} style={{ marginBottom: 12 }} />
+            <Text className="text-base font-semibold font-rounded-semibold mb-1" style={{ color: theme.textPrimary }}>Belum ada transaksi</Text>
+            <Text className="text-sm text-center font-rounded" style={{ color: theme.textSecondary }}>
               Mulai nabung atau catat pengeluaran pertama kamu
             </Text>
           </Card>
         ) : (
-          <View style={styles.transactionList}>
+          <View className="gap-2">
             {state.transactions.slice(0, 10).map((tx, i) => (
               <Animated.View key={tx.id} entering={FadeInDown.duration(300).delay(i * 40).springify()}>
                 <TransactionRow transaction={tx} />
@@ -163,25 +188,28 @@ export default function HomeScreen() {
       </ScrollView>
 
       <Modal visible={!!modalType} transparent animationType="slide" statusBarTranslucent onRequestClose={() => setModalType(null)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setModalType(null)}>
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <Pressable style={[styles.modalContent, { backgroundColor: theme.surfaceElevated }]} onPress={() => {}}>
-              <View style={[styles.modalHandle, { backgroundColor: theme.textTertiary }]} />
-              <View style={styles.modalHeader}>
-                <View style={[styles.modalIcon, { backgroundColor: isIncome ? '#34C75920' : '#FF3B3020' }]}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <Pressable className="flex-1 bg-[rgba(0,0,0,0.4)] justify-end" onPress={() => setModalType(null)}>
+            <Pressable className="rounded-t-[28px] p-6 gap-3.5 pb-10" style={{ backgroundColor: theme.surfaceElevated }} onPress={() => {}}>
+              <View className="w-9 h-[5px] rounded-full self-center mb-1" style={{ backgroundColor: theme.textTertiary }} />
+              <View className="items-center mb-1">
+                <View className="w-14 h-14 rounded-full items-center justify-center mb-3" style={{ backgroundColor: isIncome ? '#34C75920' : '#FF3B3020' }}>
                   <Ionicons name={isIncome ? 'arrow-down-circle' : 'arrow-up-circle'} size={28} color={isIncome ? '#34C759' : '#FF3B30'} />
                 </View>
-                <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>
+                <Text className="text-xl font-bold font-rounded-bold text-center" style={{ color: theme.textPrimary }}>
                   {isIncome ? 'Tambah Tabungan' : 'Catat Pemakaian'}
                 </Text>
-                <Text style={[styles.modalSubtitle, { color: theme.textSecondary }]}>
+                <Text className="text-[13px] font-rounded text-center mt-1" style={{ color: theme.textSecondary }}>
                   Atas nama <Text style={{ color: state.currentUser === 'Noval' ? '#007AFF' : '#FF2D55', fontWeight: '600' }}>{state.currentUser}</Text>
                 </Text>
               </View>
 
-              <View style={[styles.amountPreview, { backgroundColor: theme.surface }]}>
-                <Text style={[styles.amountLabel, { color: theme.textSecondary }]}>Rp</Text>
-                <Text style={[styles.amountValue, { color: previewAmount > 0 ? theme.textPrimary : theme.textTertiary }]}>
+              <View className="flex-row items-center justify-center gap-1.5 py-3.5 rounded-[14px]" style={{ backgroundColor: theme.surface }}>
+                <Text className="text-2xl font-semibold font-rounded-semibold" style={{ color: theme.textSecondary }}>Rp</Text>
+                <Text className="text-[28px] font-bold font-rounded-bold" style={{ color: previewAmount > 0 ? theme.textPrimary : theme.textTertiary }}>
                   {previewAmount > 0 ? formatNumber(previewAmount) : '0'}
                 </Text>
               </View>
@@ -202,16 +230,16 @@ export default function HomeScreen() {
                 onChangeText={setNote}
               />
               {!isIncome && previewAmount > 0 && (
-                <View style={styles.sisaRow}>
-                  <Text style={[styles.sisaLabel, { color: theme.textSecondary }]}>Sisa saldo</Text>
-                  <Text style={[styles.sisaValue, { color: previewAmount <= state.balance.current ? theme.textPrimary : theme.error }]}>
+                <View className="flex-row items-center justify-between px-1">
+                  <Text className="text-[13px] font-rounded" style={{ color: theme.textSecondary }}>Sisa saldo</Text>
+                  <Text className="text-[15px] font-semibold font-rounded-semibold" style={{ color: previewAmount <= state.balance.current ? theme.textPrimary : theme.error }}>
                     {formatCurrency(state.balance.current - previewAmount)}
                   </Text>
                 </View>
               )}
-              <View style={styles.modalUserRow}>
-                <Text style={[styles.modalUserLabel, { color: theme.textSecondary }]}>Atas nama</Text>
-                <View style={styles.modalUserToggle}>
+              <View className="flex-row items-center justify-between">
+                <Text className="text-[13px] font-semibold font-rounded-semibold" style={{ color: theme.textSecondary }}>Atas nama</Text>
+                <View className="flex-row gap-2">
                   {(['Noval', 'Kharin'] as UserName[]).map((u) => {
                     const cfg = userConfig[u];
                     const isActive = state.currentUser === u;
@@ -219,14 +247,14 @@ export default function HomeScreen() {
                       <TouchableOpacity
                         key={u}
                         onPress={() => switchUser(u)}
-                        style={[
-                          styles.modalUserChip,
-                          { borderColor: isActive ? cfg.color : theme.border },
-                          isActive && { backgroundColor: cfg.color + '15' },
-                        ]}
+                        className="flex-row items-center gap-1 py-1.5 px-3 rounded-2xl border"
+                        style={{
+                          borderColor: isActive ? cfg.color : theme.border,
+                          ...(isActive ? { backgroundColor: cfg.color + '15' } : {}),
+                        }}
                       >
                         <Ionicons name={cfg.icon} size={14} color={isActive ? cfg.color : theme.textTertiary} />
-                        <Text style={[styles.modalUserChipText, { color: isActive ? cfg.color : theme.textTertiary }]}>
+                        <Text className="text-xs font-semibold font-rounded-semibold" style={{ color: isActive ? cfg.color : theme.textTertiary }}>
                           {cfg.label}
                         </Text>
                       </TouchableOpacity>
@@ -234,20 +262,20 @@ export default function HomeScreen() {
                   })}
                 </View>
               </View>
-              <View style={styles.modalActions}>
-                <Button title="Batal" variant="ghost" onPress={() => setModalType(null)} style={styles.modalButton} />
+              <View className="flex-row gap-3 mt-2">
+                <Button title="Batal" variant="ghost" onPress={() => setModalType(null)} style={{ flex: 1 }} />
                 <Button
                   title={isIncome ? 'Simpan' : 'Simpan'}
                   variant={isIncome ? 'primary' : 'danger'}
                   onPress={() => handleAddTransaction(modalType!)}
                   loading={isSaving}
                   disabled={isSaving}
-                  style={styles.modalButton}
+                  style={{ flex: 1 }}
                 />
               </View>
             </Pressable>
-          </KeyboardAvoidingView>
-        </Pressable>
+          </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
 
       <ActionSheet
@@ -271,185 +299,3 @@ export default function HomeScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: {
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-    gap: 14,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  greeting: {
-    fontSize: 30,
-    fontWeight: '700',
-    fontFamily: 'SFProRounded-Bold',
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 15,
-    marginTop: 2,
-    fontFamily: 'SFProRounded-Regular',
-  },
-  errorBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  errorText: {
-    flex: 1,
-    fontSize: 13,
-    fontFamily: 'SFProRounded-Medium',
-  },
-  quickActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  quickButton: { flex: 1 },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    fontFamily: 'SFProRounded-Semibold',
-  },
-  sectionCount: {
-    fontSize: 13,
-    fontFamily: 'SFProRounded-Regular',
-  },
-  emptyState: {
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  emptyIcon: { marginBottom: 12 },
-  emptyTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'SFProRounded-Semibold',
-    marginBottom: 4,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    fontFamily: 'SFProRounded-Regular',
-  },
-  transactionList: { gap: 8 },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    padding: 24,
-    gap: 14,
-    paddingBottom: 40,
-  },
-  modalHandle: {
-    width: 36,
-    height: 5,
-    borderRadius: 2.5,
-    alignSelf: 'center',
-    marginBottom: 4,
-  },
-  modalHeader: {
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  modalIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    fontFamily: 'SFProRounded-Bold',
-    textAlign: 'center',
-  },
-  modalSubtitle: {
-    fontSize: 13,
-    fontFamily: 'SFProRounded-Regular',
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  amountPreview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 14,
-    borderRadius: 14,
-  },
-  amountLabel: {
-    fontSize: 24,
-    fontWeight: '600',
-    fontFamily: 'SFProRounded-Semibold',
-  },
-  amountValue: {
-    fontSize: 28,
-    fontWeight: '700',
-    fontFamily: 'SFProRounded-Bold',
-  },
-  sisaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 4,
-  },
-  sisaLabel: {
-    fontSize: 13,
-    fontFamily: 'SFProRounded-Regular',
-  },
-  sisaValue: {
-    fontSize: 15,
-    fontWeight: '600',
-    fontFamily: 'SFProRounded-Semibold',
-  },
-  modalUserRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalUserLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    fontFamily: 'SFProRounded-Semibold',
-  },
-  modalUserToggle: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  modalUserChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  modalUserChipText: {
-    fontSize: 12,
-    fontWeight: '600',
-    fontFamily: 'SFProRounded-Semibold',
-  },
-  modalActions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
-  },
-  modalButton: { flex: 1 },
-});

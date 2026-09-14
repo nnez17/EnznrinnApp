@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import '../global.css';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
@@ -7,6 +8,8 @@ import { StatusBar } from 'expo-status-bar';
 import { SavingsProvider } from '@/context/SavingsContext';
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import OTAProvider from '@/components/UpdateProvider';
+import { CycleProvider } from '@/context/CycleContext';
 import { Colors } from '@/context/colors';
 
 SplashScreen.preventAutoHideAsync();
@@ -59,7 +62,11 @@ export default function RootLayout() {
     <ErrorBoundary>
       <SavingsProvider>
         <ThemeProvider>
-          <AppNavigator />
+          <OTAProvider>
+            <CycleProvider>
+              <AppNavigator />
+            </CycleProvider>
+          </OTAProvider>
         </ThemeProvider>
       </SavingsProvider>
     </ErrorBoundary>

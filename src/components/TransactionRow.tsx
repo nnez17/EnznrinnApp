@@ -1,10 +1,9 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { Transaction } from "@/types";
 import { useTheme } from "@/context/ThemeContext";
-import { Colors } from "@/context/colors";
 import { formatCurrency } from "@/utils/formatCurrency";
-import { formatDate, formatTime } from "@/utils/dateUtils";
+import { formatDate } from "@/utils/dateUtils";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 interface TransactionRowProps {
@@ -21,7 +20,6 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({ transaction, onP
   const theme = useTheme();
   const isIncome = transaction.type === "income";
   const amountColor = isIncome ? theme.income : theme.expense;
-  const iconName = isIncome ? "arrow-down-circle-outline" : "arrow-up-circle-outline";
   const amountPrefix = isIncome ? "+" : "-";
   const userName = transaction.user;
   const userColor = userName ? userColors[userName] : theme.textTertiary;
@@ -31,97 +29,40 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({ transaction, onP
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
-      style={[styles.container, { backgroundColor: theme.surfaceElevated }]}
+      className="flex-row items-center py-3 px-4 rounded-xl gap-2.5"
+      style={{ backgroundColor: theme.surfaceElevated }}
     >
       {hasUser && (
-        <View style={[styles.userBadge, { backgroundColor: userColor + '15' }]}>
+        <View className="w-7 h-7 rounded-full items-center justify-center" style={{ backgroundColor: userColor + '15' }}>
           <Ionicons name={userName === 'Noval' ? 'man' : 'woman'} size={14} color={userColor} />
         </View>
       )}
-      <View style={styles.content}>
-        <Text style={[styles.note, { color: theme.textPrimary }]}>
+      <View className="flex-1 min-w-0">
+        <Text className="text-[15px] font-medium font-rounded-medium" style={{ color: theme.textPrimary }}>
           {transaction.note || (isIncome ? "Pemasukan" : "Pengeluaran")}
         </Text>
-        <View style={styles.meta}>
+        <View className="flex-row items-center gap-1 mt-0.5">
           {hasUser && (
             <>
-              <Text style={[styles.userName, { color: userColor }]}>
+              <Text className="text-[11px] font-semibold font-rounded-semibold" style={{ color: userColor }}>
                 {userName}
               </Text>
-              <Text style={[styles.dot, { color: theme.textTertiary }]}>·</Text>
+              <Text className="text-[11px]" style={{ color: theme.textTertiary }}>·</Text>
             </>
           )}
-          <Text style={[styles.date, { color: theme.textSecondary }]}>
+          <Text className="text-[11px] font-rounded" style={{ color: theme.textSecondary }}>
             {formatDate(transaction.date)}
           </Text>
         </View>
       </View>
-      <View style={styles.amountContainer}>
-        <Text style={[styles.amount, { color: amountColor }]}>
+      <View className="items-end">
+        <Text className="text-[15px] font-semibold font-rounded-semibold" style={{ color: amountColor }}>
           {amountPrefix}{formatCurrency(transaction.amount)}
         </Text>
-        <Text style={[styles.balance, { color: theme.textTertiary }]}>
+        <Text className="text-[11px] mt-0.5 font-rounded" style={{ color: theme.textTertiary }}>
           Saldo: {formatCurrency(transaction.balance)}
         </Text>
       </View>
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    gap: 10,
-  },
-  userBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  content: {
-    flex: 1,
-    minWidth: 0,
-  },
-  note: {
-    fontSize: 15,
-    fontWeight: "500",
-    fontFamily: "SFProRounded-Medium",
-  },
-  meta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    marginTop: 2,
-  },
-  userName: {
-    fontSize: 11,
-    fontWeight: "600",
-    fontFamily: "SFProRounded-Semibold",
-  },
-  dot: {
-    fontSize: 11,
-  },
-  date: {
-    fontSize: 11,
-    fontFamily: "SFProRounded-Regular",
-  },
-  amountContainer: {
-    alignItems: "flex-end",
-  },
-  amount: {
-    fontSize: 15,
-    fontWeight: "600",
-    fontFamily: "SFProRounded-Semibold",
-  },
-  balance: {
-    fontSize: 11,
-    marginTop: 2,
-    fontFamily: "SFProRounded-Regular",
-  },
-});

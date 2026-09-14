@@ -1,0 +1,529 @@
+openapi: 3.1.0
+info:
+  title: enznrinn API
+  version: 1.0.0
+  description: Savings + diary + cycle tracker API
+tags:
+  - { name: Users, description: App users }
+  - { name: Transactions, description: Income/expense with running balance }
+  - { name: Balance, description: Aggregate summary }
+  - { name: Targets, description: Savings targets }
+  - { name: Wishlist, description: Wishlist items }
+  - { name: Diary, description: Diary entries }
+  - { name: Cycle, description: Period tracker }
+  - { name: System, description: Health check }
+x-tagGroups:
+  - { name: Core, tags: [Users, Transactions, Balance, Targets] }
+  - { name: Extended, tags: [Wishlist, Diary, Cycle] }
+  - { name: System, tags: [System] }
+servers:
+  - url: http://localhost:8080
+components:
+  schemas:
+    Error:
+      type: object
+      description: Standard error envelope — every non-2xx response uses this shape.
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum:
+                [
+                  VALIDATION_ERROR,
+                  NOT_FOUND,
+                  INSUFFICIENT_BALANCE,
+                  DATABASE_ERROR,
+                  INTERNAL_ERROR,
+                ]
+            message: { type: string }
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    Transaction:
+      type: object
+      properties:
+        id: { type: string }
+        user: { type: string, enum: [Noval, Kharin] }
+        type: { type: string, enum: [income, expense] }
+        amount: { type: integer, format: int64 }
+        note: { type: string }
+        date: { type: string, format: date-time }
+        balance:
+          { type: integer, format: int64, description: derived running total }
+    TransactionCreate:
+      type: object
+      required: [user, type, amount]
+      properties:
+        user:
+          {
+            type: string,
+            enum: [Noval, Kharin],
+            description: user name,
+            no auth,
+          }
+        type: { type: string, enum: [income, expense] }
+        amount: { type: integer, format: int64, exclusiveMinimum: 0 }
+        note: { type: string }
+        transactionDate: { type: string, format: date-time }
+    TransactionUpdate:
+      type: object
+      properties:
+        user:
+          {
+            type: string,
+            enum: [Noval, Kharin],
+            description: user name,
+            no auth,
+          }
+        type: { type: string, enum: [income, expense] }
+        amount: { type: integer, format: int64, exclusiveMinimum: 0 }
+        note: { type: string }
+        transactionDate: { type: string, format: date-time }
+    Balance:
+      type: object
+      properties:
+        balance: { type: integer, format: int64 }
+        totalIncome: { type: integer, format: int64 }
+        totalExpense: { type: integer, format: int64 }
+        todayIncome: { type: integer, format: int64 }
+        todayExpense: { type: integer, format: int64 }
+    Target:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        targetAmount: { type: integer, format: int64 }
+        currentAmount:
+          {
+            type: integer,
+            format: int64,
+            description: derived from live balance,
+          }
+        progress: { type: number }
+        deadline: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    TargetCreate:
+      type: object
+      required: [targetAmount, deadline]
+      properties:
+        id: { type: string, description: "optional, server generates uuid" }
+        name: { type: string }
+        targetAmount: { type: integer, format: int64, exclusiveMinimum: 0 }
+        deadline: { type: string, format: date-time }
+    TargetUpdate:
+      type: object
+      properties:
+        targetAmount: { type: integer, format: int64, exclusiveMinimum: 0 }
+        deadline: { type: string, format: date-time }
+    WishlistItem:
+      type: object
+      properties:
+        id: { type: string }
+        user: { type: string }
+        name: { type: string }
+        price: { type: [integer, "null"], format: int64 }
+        priority: { type: string, enum: [low, medium, high] }
+        notes: { type: string }
+        isAchieved: { type: boolean }
+        createdAt: { type: string, format: date-time }
+    WishlistCreate:
+      type: object
+      required: [name, priority, user]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        price: { type: [integer, "null"], format: int64, minimum: 0 }
+        priority: { type: string, enum: [low, medium, high] }
+        notes: { type: string }
+        isAchieved: { type: boolean }
+        user:
+          {
+            type: string,
+            enum: [Noval, Kharin],
+            description: user name,
+            no auth,
+          }
+    WishlistUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        price: { type: [integer, "null"], format: int64, minimum: 0 }
+        priority: { type: string, enum: [low, medium, high] }
+        notes: { type: string }
+        isAchieved: { type: boolean }
+    DiaryEntry:
+      type: object
+      properties:
+        id: { type: string }
+        user: { type: string }
+        date: { type: string, format: date-time }
+        content: { type: string }
+        mood: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    DiaryCreate:
+      type: object
+      required: [date, content, user]
+      properties:
+        date: { type: string, format: date-time }
+        content: { type: string }
+        mood: { type: string }
+        user:
+          {
+            type: string,
+            enum: [Noval, Kharin],
+            description: user name,
+            no auth,
+          }
+    DiaryUpdate:
+      type: object
+      properties:
+        content: { type: string }
+        mood: { type: string }
+    CycleData:
+      type: object
+      required: [lastPeriodStart, cycleLength, periodDuration]
+      properties:
+        lastPeriodStart: { type: string, description: "YYYY-MM-DD" }
+        cycleLength: { type: integer, minimum: 21, maximum: 35 }
+        periodDuration: { type: integer, minimum: 2, maximum: 10 }
+  responses:
+    BadRequest:
+      description: Request invalid (VALIDATION_ERROR or INSUFFICIENT_BALANCE).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Resource not found (NOT_FOUND).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    InternalError:
+      description: Unexpected server error (DATABASE_ERROR or INTERNAL_ERROR).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+paths:
+  /api/v1/users:
+    get:
+      tags: [Users]
+      summary: List users
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                { type: array, items: { $ref: "#/components/schemas/User" } }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /api/v1/users/{id}:
+    get:
+      tags: [Users]
+      summary: Get user
+      parameters:
+        [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /api/v1/transactions:
+    get:
+      tags: [Transactions]
+      summary: List transactions (with running balance)
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                {
+                  type: array,
+                  items: { $ref: "#/components/schemas/Transaction" },
+                }
+        "500": { $ref: "#/components/responses/InternalError" }
+    post:
+      tags: [Transactions]
+      summary: Create transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TransactionCreate" }
+      responses:
+        "201":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Transaction" }
+        "400":
+          description: >
+            Invalid body, unknown userId, or expense exceeds balance
+            (VALIDATION_ERROR / INSUFFICIENT_BALANCE).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /api/v1/transactions/{id}:
+    parameters:
+      [{ name: id, in: path, required: true, schema: { type: string } }]
+    get:
+      tags: [Transactions]
+      summary: Get transaction
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Transaction" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+    put:
+      tags: [Transactions]
+      summary: Update transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TransactionUpdate" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Transaction" }
+        "400":
+          description: >
+            Invalid body or expense exceeds balance after update
+            (VALIDATION_ERROR / INSUFFICIENT_BALANCE).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+    delete:
+      tags: [Transactions]
+      summary: Delete transaction
+      responses:
+        "200": { description: deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /api/v1/balance:
+    get:
+      tags: [Balance]
+      summary: Get balance summary
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Balance" }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /api/v1/targets:
+    get:
+      tags: [Targets]
+      summary: List targets
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                { type: array, items: { $ref: "#/components/schemas/Target" } }
+        "500": { $ref: "#/components/responses/InternalError" }
+    post:
+      tags: [Targets]
+      summary: Create target
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TargetCreate" }
+      responses:
+        "201":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Target" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /api/v1/targets/{id}:
+    parameters:
+      [{ name: id, in: path, required: true, schema: { type: string } }]
+    get:
+      tags: [Targets]
+      summary: Get target
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Target" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+    put:
+      tags: [Targets]
+      summary: Update target
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TargetUpdate" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Target" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+    delete:
+      tags: [Targets]
+      summary: Delete target
+      responses:
+        "200": { description: deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /api/v1/wishlist:
+    get:
+      tags: [Wishlist]
+      summary: List wishlist
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                {
+                  type: array,
+                  items: { $ref: "#/components/schemas/WishlistItem" },
+                }
+        "500": { $ref: "#/components/responses/InternalError" }
+    post:
+      tags: [Wishlist]
+      summary: Create wishlist item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WishlistCreate" }
+      responses:
+        "201":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WishlistItem" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /api/v1/wishlist/{id}:
+    parameters:
+      [{ name: id, in: path, required: true, schema: { type: string } }]
+    put:
+      tags: [Wishlist]
+      summary: Update wishlist item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WishlistUpdate" }
+      responses:
+        "200": { description: updated }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+    delete:
+      tags: [Wishlist]
+      summary: Delete wishlist item
+      responses:
+        "200": { description: deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /api/v1/diary:
+    get:
+      tags: [Diary]
+      summary: List diary entries
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                {
+                  type: array,
+                  items: { $ref: "#/components/schemas/DiaryEntry" },
+                }
+        "500": { $ref: "#/components/responses/InternalError" }
+    post:
+      tags: [Diary]
+      summary: Create or upsert diary entry (201 created, 200 if same-day upsert)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DiaryCreate" }
+      responses:
+        "201":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DiaryEntry" }
+        "200":
+          description: Same-day entry already existed and was updated.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DiaryEntry" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /api/v1/diary/{id}:
+    parameters:
+      [{ name: id, in: path, required: true, schema: { type: string } }]
+    put:
+      tags: [Diary]
+      summary: Update diary entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DiaryUpdate" }
+      responses:
+        "200": { description: updated }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+    delete:
+      tags: [Diary]
+      summary: Delete diary entry
+      responses:
+        "200": { description: deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /api/v1/cycle:
+    get:
+      tags: [Cycle]
+      summary: Get cycle data (null when unset)
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CycleData" }
+        "500": { $ref: "#/components/responses/InternalError" }
+    put:
+      tags: [Cycle]
+      summary: Save cycle data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CycleData" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CycleData" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /healthz:
+    get:
+      tags: [System]
+      summary: Health check
+      responses:
+        "200": { description: ok }
+        "500": { $ref: "#/components/responses/InternalError" }

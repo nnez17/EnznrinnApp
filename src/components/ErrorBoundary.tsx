@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 
 interface Props {
   children: ReactNode;
@@ -19,14 +19,14 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.error) {
       return (
-        <View style={styles.container}>
-          <Text style={styles.title}>Terjadi Kesalahan</Text>
-          <Text style={styles.message}>{this.state.error.message}</Text>
+        <View className="flex-1 justify-center items-center p-6 bg-white">
+          <Text className="text-xl font-bold mb-3">Terjadi Kesalahan</Text>
+          <Text className="text-sm text-center text-[#666] mb-6">{this.state.error.message}</Text>
           <TouchableOpacity
-            style={styles.button}
+            className="px-6 py-3 bg-[#007AFF] rounded-xl"
             onPress={() => this.setState({ error: null })}
           >
-            <Text style={styles.buttonText}>Coba Lagi</Text>
+            <Text className="text-white font-semibold">Coba Lagi</Text>
           </TouchableOpacity>
         </View>
       );
@@ -34,34 +34,3 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#FFF',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  message: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#666',
-    marginBottom: 24,
-  },
-  button: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-  },
-  buttonText: {
-    color: '#FFF',
-    fontWeight: '600',
-  },
-});

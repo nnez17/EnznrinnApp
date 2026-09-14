@@ -27,12 +27,54 @@ export interface Target {
   createdAt: string;
 }
 
-export type ThemeMode = 'light' | 'dark';
+export type Priority = 'low' | 'medium' | 'high';
+export type MoodType = 'happy' | 'sad' | 'neutral' | 'love' | 'excited' | 'stressed';
+export type ThemeMode = 'light' | 'dark' | 'kharin';
+
+export type CyclePhase = 'menstruation' | 'follicular' | 'ovulation' | 'luteal';
+
+export interface CycleData {
+  lastPeriodStart: string;
+  cycleLength: number;
+  periodDuration: number;
+}
+
+export interface CycleDay {
+  date: string;
+  phase: CyclePhase | null;
+  dayInCycle: number;
+  isFuture: boolean;
+  isToday: boolean;
+  hasJournal: boolean;
+}
+
+export interface WishlistItem {
+  id: string;
+  name: string;
+  price?: number;
+  priority: Priority;
+  notes?: string;
+  isAchieved: boolean;
+  createdAt: string;
+  user: UserName;
+}
+
+export interface DiaryEntry {
+  id: string;
+  date: string;
+  content: string;
+  mood?: MoodType;
+  createdAt: string;
+  updatedAt: string;
+  user: UserName;
+}
 
 export interface AppState {
   transactions: Transaction[];
   balance: Balance;
   target: Target | null;
+  wishlist: WishlistItem[];
+  diary: DiaryEntry[];
   currentUser: UserName;
   isLoading: boolean;
   isAuthenticated: boolean;

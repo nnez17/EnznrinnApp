@@ -1,7 +1,6 @@
-import React, { forwardRef, useMemo, useCallback } from "react";
-import { TextInput, View, Text, TouchableOpacity, ViewStyle, TextStyle, StyleSheet, TextInputProps } from "react-native";
+import React, { forwardRef, useCallback } from "react";
+import { TextInput, View, Text, TouchableOpacity, ViewStyle, TextStyle, TextInputProps } from "react-native";
 import { useTheme } from "@/context/ThemeContext";
-import { Colors } from "@/context/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { formatNumberInput } from "@/utils/formatCurrency";
 
@@ -19,7 +18,6 @@ export const Input = forwardRef<TextInput, InputProps>(({
 }, ref) => {
   const theme = useTheme();
   const hasError = !!error;
-  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const handleChangeText = useCallback((text: string) => {
     if (!onChangeText) return;
@@ -34,13 +32,17 @@ export const Input = forwardRef<TextInput, InputProps>(({
   const displayValue = formatType === 'number' ? (value || '') : value;
 
   return (
-    <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
-      <View style={[styles.inputWrapper, hasError && styles.inputWrapperError]}>
-        {leftIcon && <Ionicons name={leftIcon as any} size={20} color={hasError ? theme.error : theme.textTertiary} style={styles.icon} />}
+    <View className="gap-1.5" style={containerStyle}>
+      {label && <Text className="text-[13px] font-semibold font-rounded-semibold tracking-[0.3px]" style={{ color: theme.textSecondary }}>{label}</Text>}
+      <View
+        className={`flex-row items-center rounded-[14px] border ${hasError ? 'border-[#FF3B30]' : ''}`}
+        style={{ backgroundColor: theme.surface, borderColor: hasError ? theme.error : theme.border }}
+      >
+        {leftIcon && <Ionicons name={leftIcon as any} size={20} color={hasError ? theme.error : theme.textTertiary} style={{ marginLeft: 14 }} />}
         <TextInput
           ref={ref}
-          style={[styles.input, leftIcon ? styles.inputWithLeftIcon : undefined, rightIcon ? styles.inputWithRightIcon : undefined, hasError && styles.inputError, inputStyle]}
+          className={`flex-1 text-base font-rounded py-3.5 px-3.5 ${leftIcon ? 'pl-2' : ''} ${rightIcon ? 'pr-2' : ''}`}
+          style={{ color: hasError ? theme.error : theme.textPrimary }}
           placeholder={placeholder}
           placeholderTextColor={theme.textTertiary}
           onChangeText={handleChangeText}
@@ -48,24 +50,10 @@ export const Input = forwardRef<TextInput, InputProps>(({
           keyboardType={formatType === 'number' ? 'number-pad' : props.keyboardType}
           {...props}
         />
-        {rightIcon && <TouchableOpacity onPress={onRightIconPress} style={styles.iconWrapper}><Ionicons name={rightIcon as any} size={20} color={theme.textTertiary} style={styles.icon} /></TouchableOpacity>}
+        {rightIcon && <TouchableOpacity onPress={onRightIconPress} style={{ paddingRight: 14 }}><Ionicons name={rightIcon as any} size={20} color={theme.textTertiary} /></TouchableOpacity>}
       </View>
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && <Text className="text-xs font-rounded" style={{ color: theme.error }}>{error}</Text>}
     </View>
   );
 });
 Input.displayName = "Input";
-
-const createStyles = (theme: typeof Colors.light) => StyleSheet.create({
-  container: { gap: 6 },
-  label: { fontSize: 13, fontWeight: "600", color: theme.textSecondary, fontFamily: "SFProRounded-Semibold", letterSpacing: 0.3 },
-  inputWrapper: { flexDirection: "row", alignItems: "center", backgroundColor: theme.surface, borderRadius: 14, borderWidth: 1, borderColor: theme.border },
-  inputWrapperError: { borderColor: theme.error },
-  icon: { marginLeft: 14 },
-  iconWrapper: { paddingRight: 14 },
-  input: { flex: 1, fontSize: 16, color: theme.textPrimary, paddingVertical: 14, paddingHorizontal: 14, fontFamily: "SFProRounded-Regular" },
-  inputWithLeftIcon: { paddingLeft: 8 },
-  inputWithRightIcon: { paddingRight: 8 },
-  inputError: { color: theme.error },
-  errorText: { fontSize: 12, color: theme.error, fontFamily: "SFProRounded-Regular" },
-});

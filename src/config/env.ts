@@ -1,31 +1,13 @@
 import Constants from 'expo-constants';
 
-type FirebaseEnvConfig = {
-  apiKey?: string;
-  authDomain?: string;
-  projectId?: string;
-  storageBucket?: string;
-  messagingSenderId?: string;
-  appId?: string;
-};
+// Android emulator instead needs http://10.0.2.2:8080 via EXPO_PUBLIC_API_URL.
+function resolveApiUrl(): string {
+  const env = process.env.EXPO_PUBLIC_API_URL;
+  if (env) return env;
+  const host = Constants.expoConfig?.hostUri?.split(':')[0];
+  return `http://${host || 'localhost'}:8080`;
+}
 
-const extra = (Constants.expoConfig?.extra ?? Constants.manifest2?.extra ?? {}) as {
-  firebase?: FirebaseEnvConfig;
-};
+export const API_URL = resolveApiUrl();
 
-const firebaseEnv = extra.firebase ?? {};
-
-export const FIREBASE_CONFIG = {
-  apiKey: firebaseEnv.apiKey ?? '',
-  authDomain: firebaseEnv.authDomain ?? '',
-  projectId: firebaseEnv.projectId ?? '',
-  storageBucket: firebaseEnv.storageBucket ?? '',
-  messagingSenderId: firebaseEnv.messagingSenderId ?? '',
-  appId: firebaseEnv.appId ?? '',
-};
-
-export const hasFirebaseConfig = Boolean(
-  FIREBASE_CONFIG.apiKey &&
-  FIREBASE_CONFIG.projectId &&
-  FIREBASE_CONFIG.appId
-);
+export const hasApiConfig = Boolean(process.env.EXPO_PUBLIC_API_URL);

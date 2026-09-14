@@ -14,6 +14,7 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -40,6 +41,9 @@
       "@/services/*": [
         "src/services/*"
       ],
+      "@/api/*": [
+        "src/api/*"
+      ],
       "@/constants/*": [
         "src/constants/*"
       ]
@@ -47,10 +51,13 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "nativewind-env.d.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "database",
+    "backend"
   ],
   "extends": "expo/tsconfig.base"
 }

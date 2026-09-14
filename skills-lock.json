@@ -1,17 +1,23 @@
 {
   "version": 1,
   "skills": {
-    "design-taste-frontend": {
-      "source": "Leonxlnx/taste-skill",
+    "golang-gin-api": {
+      "source": "henriqueatila/golang-gin-best-practices",
       "sourceType": "github",
-      "skillPath": "skills/taste-skill/SKILL.md",
-      "computedHash": "899b84384f74f540ea5284d9b2e9234e050998b42eacc805410b518d4226c0b3"
+      "skillPath": "skills/golang-gin-api/SKILL.md",
+      "computedHash": "d6d1192dfcd91e9078094b46e960de101c7e949ffc822cb6f5ede2d1c0adf4b5"
     },
-    "frontend-design": {
-      "source": "anthropics/skills",
+    "golang-gin-database": {
+      "source": "henriqueatila/golang-gin-best-practices",
       "sourceType": "github",
-      "skillPath": "skills/frontend-design/SKILL.md",
-      "computedHash": "93f53fd1c0352d3d7ec17b8f73d7351bf76f4821e55d123c9d2abc2c53ba48e4"
+      "skillPath": "skills/golang-gin-database/SKILL.md",
+      "computedHash": "514876d4ad5c1d7466459371971821e2f9681c220b3422c5b3afbe35367a911d"
+    },
+    "golang-pro": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/golang-pro/SKILL.md",
+      "computedHash": "e89db8a7eda7d664e813b6a5e36aa5ddf2fb836ce92413341d3193a9930048e5"
     }
   }
 }

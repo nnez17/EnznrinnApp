@@ -13,5 +13,16 @@ dist
 eas.json
 
 #Agents
-.agents
 AGENTS.md
+.agents/
+cc/
+
+#Go
+backend/server
+*.exe
+
+#Logs
+*.log
+
+#npm
+.npmrc

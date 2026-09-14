@@ -20,13 +20,13 @@ interface ButtonProps extends TouchableOpacityProps {
   rightIcon?: React.ReactNode;
 }
 
-const sizePresets: Record<string, { container: ViewStyle; text: TextStyle }> = {
-  small: { container: { paddingVertical: 8, paddingHorizontal: 16 }, text: { fontSize: 14 } },
-  medium: { container: { paddingVertical: 14, paddingHorizontal: 24 }, text: { fontSize: 16 } },
-  large: { container: { paddingVertical: 18, paddingHorizontal: 32 }, text: { fontSize: 18 } },
+const sizePresets: Record<string, { container: string; text: TextStyle }> = {
+  small: { container: "py-2 px-4", text: { fontSize: 14 } },
+  medium: { container: "py-3.5 px-6", text: { fontSize: 16 } },
+  large: { container: "py-[18px] px-8", text: { fontSize: 18 } },
 };
 
-export const Button = React.forwardRef<TouchableOpacity, ButtonProps>(
+export const Button = React.forwardRef<React.ComponentRef<typeof TouchableOpacity>, ButtonProps>(
   (
     {
       title,
@@ -68,27 +68,19 @@ export const Button = React.forwardRef<TouchableOpacity, ButtonProps>(
 
     const isDisabled = disabled || loading;
 
+    // Colors are theme-dynamic → stay as style objects (PRD §6.2).
     const containerStyle = [
       {
-        borderRadius: 14,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 8,
-        width: fullWidth ? "100%" : undefined,
         backgroundColor: colors.bg[variant],
         borderWidth: colors.border[variant] ? 1.5 as const : 0,
         borderColor: colors.border[variant],
         ...((variant === 'primary' || variant === 'danger') ? { shadowColor: colors.bg[variant], shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 } : {}),
       },
-      sizePresets[size].container,
       isDisabled ? { opacity: 0.5 } : undefined,
       style,
     ].filter(Boolean) as ViewStyle[];
 
     const textStyle: TextStyle = {
-      fontWeight: "600",
-      fontFamily: "SFProRounded-Semibold",
       color: colors.text[variant],
       ...sizePresets[size].text,
     } as TextStyle;
@@ -96,6 +88,7 @@ export const Button = React.forwardRef<TouchableOpacity, ButtonProps>(
     return (
       <TouchableOpacity
         ref={ref}
+        className={`rounded-[14px] flex-row items-center justify-center gap-2 ${sizePresets[size].container} ${fullWidth ? "w-full" : ""} font-rounded-semibold font-semibold`}
         style={containerStyle}
         onPress={isDisabled ? undefined : onPress}
         activeOpacity={0.9}

@@ -1,0 +1,12 @@
+{
+  "name": "@enznrinn/database",
+  "private": true,
+  "scripts": {
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.26.0",
+    "drizzle-orm": "^0.36.0"
+  }
+}

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { View, Text, Dimensions } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { Target } from "@/types";
 import { useTheme } from "@/context/ThemeContext";
@@ -41,8 +41,8 @@ export const TargetProgress: React.FC<TargetProgressProps> = ({ target, currentB
   const ringColor = isCompleted ? theme.success : isOverdue ? theme.error : theme.primary;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.wrapper}>
+    <View className="items-center gap-4">
+      <View className="relative items-center justify-center mb-2" style={{ width: SIZE, height: SIZE }}>
         <Svg width={SIZE} height={SIZE}>
           <Circle
             cx={SIZE / 2}
@@ -65,81 +65,65 @@ export const TargetProgress: React.FC<TargetProgressProps> = ({ target, currentB
             animatedProps={animatedProps}
           />
         </Svg>
-        <View style={[styles.inner, { width: SIZE - STROKE * 2, height: SIZE - STROKE * 2, borderRadius: (SIZE - STROKE * 2) / 2, backgroundColor: theme.surface }]}>
-          <Text style={[styles.pct, { color: theme.textPrimary }]}>{Math.round(pct * 100)}%</Text>
-          <Text style={[styles.label, { color: theme.textSecondary }]}>{isCompleted ? "Tercapai!" : "terkumpul"}</Text>
-          <Text style={[styles.amount, { color: theme.textTertiary }]}>{formatCurrency(currentBalance)}</Text>
+        <View
+          className="absolute items-center justify-center"
+          style={{ width: SIZE - STROKE * 2, height: SIZE - STROKE * 2, borderRadius: (SIZE - STROKE * 2) / 2, backgroundColor: theme.surface }}
+        >
+          <Text className="text-[36px] font-bold font-rounded-bold" style={{ color: theme.textPrimary }}>{Math.round(pct * 100)}%</Text>
+          <Text className="text-[13px] font-medium font-rounded-medium mt-0.5" style={{ color: theme.textSecondary }}>{isCompleted ? "Tercapai!" : "terkumpul"}</Text>
+          <Text className="text-xs font-rounded mt-0.5" style={{ color: theme.textTertiary }}>{formatCurrency(currentBalance)}</Text>
         </View>
       </View>
 
-      <View style={[styles.infoGrid, { backgroundColor: theme.surfaceElevated }]}>
-        <View style={styles.infoItem}>
-          <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Target</Text>
-          <Text style={[styles.infoValue, { color: theme.textPrimary }]}>{formatCurrency(target.targetAmount)}</Text>
+      <View className="flex-row justify-between w-full rounded-2xl py-4 px-2" style={{ backgroundColor: theme.surfaceElevated }}>
+        <View className="flex-1 items-center gap-1">
+          <Text className="text-[11px] font-medium font-rounded-medium" style={{ color: theme.textSecondary }}>Target</Text>
+          <Text className="text-[15px] font-semibold font-rounded-semibold" style={{ color: theme.textPrimary }}>{formatCurrency(target.targetAmount)}</Text>
         </View>
-        <View style={[styles.infoDivider, { backgroundColor: theme.border }]} />
-        <View style={styles.infoItem}>
-          <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Terkumpul</Text>
-          <Text style={[styles.infoValue, { color: theme.textPrimary }]}>{formatCurrency(currentBalance)}</Text>
+        <View className="w-px h-9" style={{ backgroundColor: theme.border }} />
+        <View className="flex-1 items-center gap-1">
+          <Text className="text-[11px] font-medium font-rounded-medium" style={{ color: theme.textSecondary }}>Terkumpul</Text>
+          <Text className="text-[15px] font-semibold font-rounded-semibold" style={{ color: theme.textPrimary }}>{formatCurrency(currentBalance)}</Text>
         </View>
-        <View style={[styles.infoDivider, { backgroundColor: theme.border }]} />
-        <View style={styles.infoItem}>
-          <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Sisa</Text>
-          <Text style={[styles.infoValue, { color: isCompleted ? theme.success : theme.primary }]}>{formatCurrency(Math.max(target.targetAmount - currentBalance, 0))}</Text>
+        <View className="w-px h-9" style={{ backgroundColor: theme.border }} />
+        <View className="flex-1 items-center gap-1">
+          <Text className="text-[11px] font-medium font-rounded-medium" style={{ color: theme.textSecondary }}>Sisa</Text>
+          <Text className="text-[15px] font-semibold font-rounded-semibold" style={{ color: isCompleted ? theme.success : theme.primary }}>{formatCurrency(Math.max(target.targetAmount - currentBalance, 0))}</Text>
         </View>
       </View>
 
-      <View style={[styles.deadlineInfo, { backgroundColor: theme.surfaceElevated }]}>
-        <View style={styles.deadlineItem}>
-          <Text style={[styles.deadlineLabel, { color: theme.textSecondary }]}>Batas Waktu</Text>
-          <Text style={[styles.deadlineValue, { color: theme.textPrimary }]}>{formatDate(target.deadline)}</Text>
+      <View className="flex-row justify-between w-full rounded-2xl py-4 px-2 gap-2" style={{ backgroundColor: theme.surfaceElevated }}>
+        <View className="flex-1 items-center gap-1">
+          <Text className="text-[11px] font-medium font-rounded-medium" style={{ color: theme.textSecondary }}>Batas Waktu</Text>
+          <Text className="text-sm font-semibold font-rounded-semibold" style={{ color: theme.textPrimary }}>{formatDate(target.deadline)}</Text>
         </View>
-        <View style={[styles.deadlineDivider, { backgroundColor: theme.border }]} />
-        <View style={styles.deadlineItem}>
-          <Text style={[styles.deadlineLabel, { color: theme.textSecondary }]}>{isCompleted ? "Selesai" : isOverdue ? "Terlambat" : "Hari Tersisa"}</Text>
-          <Text style={[styles.deadlineValue, isCompleted && { color: theme.success }, isOverdue && { color: theme.error }]}>
+        <View className="w-px h-9" style={{ backgroundColor: theme.border }} />
+        <View className="flex-1 items-center gap-1">
+          <Text className="text-[11px] font-medium font-rounded-medium" style={{ color: theme.textSecondary }}>{isCompleted ? "Selesai" : isOverdue ? "Terlambat" : "Hari Tersisa"}</Text>
+          <Text
+            className="text-sm font-semibold font-rounded-semibold"
+            style={isCompleted ? { color: theme.success } : isOverdue ? { color: theme.error } : undefined}
+          >
             {isCompleted ? "✓" : isOverdue ? `${Math.abs(daysLeft)} hari` : `${daysLeft} hari`}
           </Text>
         </View>
         {!isCompleted && daysLeft > 0 && (
-          <View style={[styles.deadlineDivider, { backgroundColor: theme.border }]} />
+          <View className="w-px h-9" style={{ backgroundColor: theme.border }} />
         )}
         {!isCompleted && daysLeft > 0 && (
-          <View style={styles.deadlineItem}>
-            <Text style={[styles.deadlineLabel, { color: theme.textSecondary }]}>Per Hari</Text>
-            <Text style={[styles.deadlineValue, { color: theme.primary }]}>{formatCurrency(dailyNeeded)}</Text>
+          <View className="flex-1 items-center gap-1">
+            <Text className="text-[11px] font-medium font-rounded-medium" style={{ color: theme.textSecondary }}>Per Hari</Text>
+            <Text className="text-sm font-semibold font-rounded-semibold" style={{ color: theme.primary }}>{formatCurrency(dailyNeeded)}</Text>
           </View>
         )}
       </View>
 
       {!isCompleted && daysLeft > 0 && (
-        <View style={[styles.dailyNeeded, { backgroundColor: theme.primaryLight }]}>
-          <Text style={[styles.dailyLabel, { color: theme.primary }]}>Butuh per hari</Text>
-          <Text style={[styles.dailyValue, { color: theme.primary }]}>{formatCurrency(dailyNeeded)}/hari</Text>
+        <View className="w-full p-4 rounded-[14px] flex-row justify-between items-center" style={{ backgroundColor: theme.primaryLight }}>
+          <Text className="text-sm font-medium font-rounded-medium" style={{ color: theme.primary }}>Butuh per hari</Text>
+          <Text className="text-base font-bold font-rounded-bold" style={{ color: theme.primary }}>{formatCurrency(dailyNeeded)}/hari</Text>
         </View>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { alignItems: "center", gap: 16 },
-  wrapper: { position: "relative", alignItems: "center", justifyContent: "center", marginBottom: 8, width: SIZE, height: SIZE },
-  inner: { position: "absolute", alignItems: "center", justifyContent: "center" },
-  pct: { fontSize: 36, fontWeight: "700", fontFamily: "SFProRounded-Bold" },
-  label: { fontSize: 13, fontFamily: "SFProRounded-Medium", marginTop: 2 },
-  amount: { fontSize: 12, fontFamily: "SFProRounded-Regular", marginTop: 2 },
-  infoGrid: { flexDirection: "row", justifyContent: "space-between", width: "100%", borderRadius: 16, paddingVertical: 16, paddingHorizontal: 8 },
-  infoItem: { flex: 1, alignItems: "center", gap: 4 },
-  infoDivider: { width: 1, height: 36 },
-  infoLabel: { fontSize: 11, fontFamily: "SFProRounded-Medium" },
-  infoValue: { fontSize: 15, fontWeight: "600", fontFamily: "SFProRounded-Semibold" },
-  deadlineInfo: { flexDirection: "row", justifyContent: "space-between", width: "100%", borderRadius: 16, paddingVertical: 16, paddingHorizontal: 8, gap: 8 },
-  deadlineItem: { flex: 1, alignItems: "center", gap: 4 },
-  deadlineLabel: { fontSize: 11, fontFamily: "SFProRounded-Medium" },
-  deadlineValue: { fontSize: 14, fontWeight: "600", fontFamily: "SFProRounded-Semibold" },
-  deadlineDivider: { width: 1, height: 36 },
-  dailyNeeded: { width: "100%", padding: 16, borderRadius: 14, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  dailyLabel: { fontSize: 14, fontWeight: "500", fontFamily: "SFProRounded-Medium" },
-  dailyValue: { fontSize: 16, fontWeight: "700", fontFamily: "SFProRounded-Bold" },
-});

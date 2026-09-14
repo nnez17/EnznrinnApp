@@ -1,16 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
-  View, Text, ScrollView, StyleSheet,
+  View, Text, ScrollView,
   TouchableOpacity,
 } from 'react-native';
 import { useSavings } from '@/context/SavingsContext';
 import { Colors } from '@/context/colors';
 import { useTheme } from '@/context/ThemeContext';
-import { Button } from '@/components/Button';
-import { ActionSheet } from '@/components/ActionSheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { hasFirebaseConfig } from '@/config/env';
+import { getCurrentVersion } from '@/services/updateService';
 
 
 function SettingRow({
@@ -27,8 +25,8 @@ function SettingRow({
 }) {
   return (
     <TouchableOpacity
+      className="flex-row items-center py-[13px] px-4 gap-3"
       style={[
-        styles.settingRow,
         { backgroundColor: theme.surfaceElevated },
         !isLast && { borderBottomWidth: 0.5, borderBottomColor: theme.separator },
       ]}
@@ -36,13 +34,13 @@ function SettingRow({
       disabled={!onPress}
       activeOpacity={0.7}
     >
-      <View style={[styles.settingIcon, { backgroundColor: destructive ? '#FF3B3015' : theme.primaryLight }]}>
+      <View className="w-8 h-8 rounded-[10px] items-center justify-center" style={{ backgroundColor: destructive ? '#FF3B3015' : theme.primaryLight }}>
         <Ionicons name={icon} size={18} color={destructive ? '#FF3B30' : theme.primary} />
       </View>
-      <Text style={[styles.settingLabel, { color: destructive ? '#FF3B30' : theme.textPrimary }]}>
+      <Text className="flex-1 text-[15px] font-medium font-rounded-medium" style={{ color: destructive ? '#FF3B30' : theme.textPrimary }}>
         {label}
       </Text>
-      {value && <Text style={[styles.settingValue, { color: theme.textSecondary }]}>{value}</Text>}
+      {value && <Text className="text-[13px] font-rounded max-w-[120px] text-right" style={{ color: theme.textSecondary }}>{value}</Text>}
       {(onPress || rightIcon) && !destructive &&
         <Ionicons name={rightIcon || 'chevron-forward'} size={16} color={theme.textTertiary} />
       }
@@ -50,81 +48,39 @@ function SettingRow({
   );
 }
 
-const themeOptions: { key: 'light' | 'dark'; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
+const themeOptions: { key: 'light' | 'dark' | 'kharin'; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
   { key: 'light', icon: 'sunny-outline', label: 'Terang' },
   { key: 'dark', icon: 'moon-outline', label: 'Gelap' },
+  { key: 'kharin', icon: 'heart-outline', label: 'Kharin' },
 ];
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const { state, syncFromSheet, setThemeMode, checkConnection } = useSavings();
-  const isConnected = hasFirebaseConfig;
-  const [syncing, setSyncing] = React.useState(false);
-  const [errorSheet, setErrorSheet] = React.useState<{ visible: boolean; message: string }>({ visible: false, message: '' });
-
-  useEffect(() => {
-    checkConnection();
-  }, []);
-
-  const handleSync = async () => {
-    setSyncing(true);
-    try { await syncFromSheet(); }
-    catch (e) { setErrorSheet({ visible: true, message: e instanceof Error ? e.message : 'Gagal sinkronisasi' }); }
-    finally { setSyncing(false); }
-  };
+  const { state, setThemeMode } = useSavings();
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]} contentContainerStyle={styles.content}>
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Text style={[styles.title, { color: theme.textPrimary }]}>Pengaturan</Text>
+    <ScrollView className="flex-1" style={{ backgroundColor: theme.background }} contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, gap: 8 }}>
+      <View className="mb-2" style={{ paddingTop: insets.top + 12 }}>
+        <Text className="text-[30px] font-bold font-rounded-bold tracking-[-0.5px]" style={{ color: theme.textPrimary }}>Pengaturan</Text>
       </View>
 
-      <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>Sinkronisasi</Text>
-      <View style={styles.section}>
-        <SettingRow
-          icon="cloud-done-outline"
-          label="Terakhir Sinkron"
-          value={state.lastSynced ? new Date(state.lastSynced).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Tidak pernah'}
-          theme={theme}
-          isLast={false}
-        />
-        <SettingRow
-          icon={state.isOnline ? "checkmark-circle-outline" : "close-circle-outline"}
-          label="Status"
-          value={!isConnected ? 'Belum dikonfigurasi' : state.isOnline ? 'Online' : 'Offline'}
-          theme={theme}
-          isLast={true}
-        />
-      </View>
-
-      {!isConnected && (
-        <Button
-          title="Sinkronkan Sekarang"
-          variant="primary"
-          onPress={handleSync}
-          loading={syncing}
-          leftIcon={<Ionicons name="sync-outline" size={20} color="#FFF" />}
-          fullWidth
-        />
-      )}
-
-      <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>Tampilan</Text>
-      <View style={styles.section}>
-        <View style={[styles.settingRow, { backgroundColor: theme.surfaceElevated }]}>
-          <View style={[styles.settingIcon, { backgroundColor: theme.primaryLight }]}>
+      <Text className="text-[13px] font-semibold font-rounded-semibold ml-1 mt-3 mb-1.5 uppercase tracking-[0.5px]" style={{ color: theme.textSecondary }}>Tampilan</Text>
+      <View className="rounded-[14px] overflow-hidden mb-2">
+        <View className="flex-row items-center py-[13px] px-4 gap-3" style={{ backgroundColor: theme.surfaceElevated }}>
+          <View className="w-8 h-8 rounded-[10px] items-center justify-center" style={{ backgroundColor: theme.primaryLight }}>
             <Ionicons name="color-palette-outline" size={18} color={theme.primary} />
           </View>
-          <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>Mode</Text>
-          <View style={styles.themeToggle}>
+          <Text className="flex-1 text-[15px] font-medium font-rounded-medium" style={{ color: theme.textPrimary }}>Mode</Text>
+          <View className="flex-row gap-1.5">
             {themeOptions.map((opt) => {
               const isActive = state.themeMode === opt.key;
               return (
                 <TouchableOpacity
                   key={opt.key}
                   onPress={() => setThemeMode(opt.key)}
+                  className="flex-row items-center gap-1 py-1.5 px-2.5 rounded-[10px] border"
                   style={[
-                    styles.themeOption,
                     { borderColor: theme.border },
                     isActive && { backgroundColor: theme.primary, borderColor: theme.primary },
                   ]}
@@ -135,10 +91,8 @@ export default function SettingsScreen() {
                     color={isActive ? '#FFF' : theme.textSecondary}
                   />
                   <Text
-                    style={[
-                      styles.themeOptionText,
-                      { color: isActive ? '#FFF' : theme.textSecondary },
-                    ]}
+                    className="text-xs font-semibold font-rounded-semibold"
+                    style={{ color: isActive ? '#FFF' : theme.textSecondary }}
                   >
                     {opt.label}
                   </Text>
@@ -149,114 +103,14 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      <View style={styles.footer}>
-        <Text style={[styles.footerText, { color: theme.textTertiary }]}>
+      <View className="mt-8 py-4 items-center">
+        <Text className="text-sm text-center leading-[22px] font-rounded" style={{ color: theme.textTertiary }}>
           Dibuat oleh Noval dengan ❤️ untuk pacarku Kharin
         </Text>
+        <Text className="text-xs text-center mt-6 font-rounded" style={{ color: theme.textTertiary }}>
+          v{getCurrentVersion()}
+        </Text>
       </View>
-      <ActionSheet
-        visible={errorSheet.visible}
-        title="Error"
-        message={errorSheet.message}
-        options={[
-          { text: 'OK', style: 'cancel', onPress: () => setErrorSheet({ visible: false, message: '' }) },
-        ]}
-        onClose={() => setErrorSheet({ visible: false, message: '' })}
-      />
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: {
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-    gap: 8,
-  },
-  header: {
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: '700',
-    fontFamily: 'SFProRounded-Bold',
-    letterSpacing: -0.5,
-  },
-  section: {
-    borderRadius: 14,
-    overflow: 'hidden',
-    marginBottom: 8,
-  },
-  sectionLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    fontFamily: 'SFProRounded-Semibold',
-    marginLeft: 4,
-    marginTop: 12,
-    marginBottom: 6,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  settingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 13,
-    paddingHorizontal: 16,
-    gap: 12,
-  },
-  settingIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  settingLabel: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '500',
-    fontFamily: 'SFProRounded-Medium',
-  },
-  settingValue: {
-    fontSize: 13,
-    fontFamily: 'SFProRounded-Regular',
-    maxWidth: 120,
-    textAlign: 'right',
-  },
-  version: {
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 24,
-    fontFamily: 'SFProRounded-Regular',
-  },
-  themeToggle: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  themeOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  themeOptionText: {
-    fontSize: 12,
-    fontWeight: '600',
-    fontFamily: 'SFProRounded-Semifold',
-  },
-  footer: {
-    marginTop: 32,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 14,
-    textAlign: 'center',
-    fontFamily: 'SFProRounded-Regular',
-    lineHeight: 22,
-  },
-});

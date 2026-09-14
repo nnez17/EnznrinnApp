@@ -1,7 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity, ViewStyle } from "react-native";
 import { useTheme } from "@/context/ThemeContext";
-import { Colors } from "@/context/colors";
 
 interface CardProps {
   children: React.ReactNode;
@@ -11,11 +10,11 @@ interface CardProps {
   onPress?: () => void;
 }
 
-const paddingValues: Record<string, ViewStyle> = {
-  none: { padding: 0 },
-  small: { padding: 12 },
-  medium: { padding: 16 },
-  large: { padding: 24 },
+const paddingClasses: Record<string, string> = {
+  none: "",
+  small: "p-3",
+  medium: "p-4",
+  large: "p-6",
 };
 
 export const Card: React.FC<CardProps> = ({
@@ -27,9 +26,9 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const theme = useTheme();
 
-  const containerStyle: ViewStyle = {
+  // Dynamic theme colors + shadow objects stay as style objects (PRD §6.2).
+  const themedStyle: ViewStyle = {
     backgroundColor: theme.surfaceElevated,
-    borderRadius: 16,
     ...(elevated && {
       shadowColor: theme.shadow,
       shadowOffset: { width: 0, height: 4 },
@@ -37,7 +36,6 @@ export const Card: React.FC<CardProps> = ({
       shadowRadius: 12,
       elevation: 4,
     }),
-    ...paddingValues[padding],
     ...style,
   };
 
@@ -46,12 +44,13 @@ export const Card: React.FC<CardProps> = ({
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.9}
-        style={containerStyle}
+        className={`rounded-2xl ${paddingClasses[padding]}`}
+        style={themedStyle}
       >
         {children}
       </TouchableOpacity>
     );
   }
 
-  return <View style={containerStyle}>{children}</View>;
+  return <View className={`rounded-2xl ${paddingClasses[padding]}`} style={themedStyle}>{children}</View>;
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet,
+  View, Text, ScrollView,
   Modal, Pressable, KeyboardAvoidingView, Platform,
   TouchableOpacity,
 } from 'react-native';
@@ -13,8 +13,9 @@ import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { TargetProgress } from '@/components/TargetProgress';
 import { ActionSheet } from '@/components/ActionSheet';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function getTomorrow(): Date {
   const d = new Date();
@@ -110,30 +111,37 @@ export default function TargetScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View className="flex-1" style={{ backgroundColor: theme.background }}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, gap: 16 }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-          <Text style={[styles.title, { color: theme.textPrimary }]}>Target</Text>
-          <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{target ? 'Progress tabunganmu' : 'Buat target tabungan'}</Text>
+        <View style={{ paddingTop: insets.top + 12 }}>
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity onPress={() => router.back()} className="w-9 h-9 rounded-full items-center justify-center">
+              <Ionicons name="chevron-back" size={24} color={theme.primary} />
+            </TouchableOpacity>
+            <View>
+              <Text className="text-[26px] font-bold font-rounded-bold tracking-[-0.5px]" style={{ color: theme.textPrimary }}>Target</Text>
+              <Text className="text-sm mt-0.5 font-rounded" style={{ color: theme.textSecondary }}>{target ? 'Progress tabunganmu' : 'Buat target tabungan'}</Text>
+            </View>
+          </View>
         </View>
 
         {target ? (
           <>
             <TargetProgress target={target} currentBalance={state.balance.current} />
 
-            <Card style={styles.infoCard} padding="medium">
-              <View style={styles.infoRow}>
-                <View style={[styles.infoIcon, { backgroundColor: theme.primaryLight }]}>
+            <Card padding="medium">
+              <View className="flex-row items-center gap-3">
+                <View className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: theme.primaryLight }}>
                   <Ionicons
                     name={completed ? 'checkmark-circle' : overdue ? 'alert-circle' : 'information-circle'}
                     size={22}
                     color={completed ? theme.success : overdue ? theme.error : theme.primary}
                   />
                 </View>
-                <Text style={[styles.infoText, { color: theme.textSecondary }]}>{completed
+                <Text className="flex-1 text-sm leading-5 font-rounded" style={{ color: theme.textSecondary }}>{completed
                     ? 'Selamat! Kamu sudah mencapai target tabungan.'
                     : overdue
                       ? 'Target belum tercapai dan sudah melewati batas waktu.'
@@ -142,7 +150,7 @@ export default function TargetScreen() {
               </View>
             </Card>
 
-            <View style={styles.actions}>
+            <View className="gap-3">
               <Button
                 title="Edit Target"
                 variant="secondary"
@@ -158,34 +166,37 @@ export default function TargetScreen() {
             </View>
           </>
         ) : (
-          <Card style={styles.emptyState} padding="large">
-            <View style={[styles.emptyIconWrapper, { backgroundColor: theme.primaryLight }]}>
+          <Card style={{ alignItems: 'center', marginTop: 32 }} padding="large">
+            <View className="w-[72px] h-[72px] rounded-full items-center justify-center mb-4" style={{ backgroundColor: theme.primaryLight }}>
               <Ionicons name="flag-outline" size={36} color={theme.primary} />
             </View>
-            <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>Belum ada target</Text>
-            <Text style={[styles.emptySubtitle, { color: theme.textSecondary }]}>Buat target tabungan untuk membantumu menabung lebih disiplin</Text>
+            <Text className="text-lg font-semibold font-rounded-semibold mb-2" style={{ color: theme.textPrimary }}>Belum ada target</Text>
+            <Text className="text-sm text-center font-rounded mb-6 leading-5" style={{ color: theme.textSecondary }}>Buat target tabungan untuk membantumu menabung lebih disiplin</Text>
             <Button
               title="Buat Target Baru"
               variant="primary"
               onPress={openCreateModal}
               leftIcon={<Ionicons name="add-circle" size={20} color="#FFF" />}
-              style={styles.createButton}
+              style={{ width: '100%' }}
             />
           </Card>
         )}
       </ScrollView>
 
       <Modal visible={showModal} transparent animationType="slide" statusBarTranslucent onRequestClose={() => setShowModal(false)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setShowModal(false)}>
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <Pressable style={[styles.modalContent, { backgroundColor: theme.surfaceElevated }]} onPress={() => {}}>
-              <View style={[styles.modalHandle, { backgroundColor: theme.textTertiary }]} />
-              <View style={styles.modalHeader}>
-                <View style={[styles.modalIcon, { backgroundColor: theme.primaryLight }]}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <Pressable className="flex-1 bg-[rgba(0,0,0,0.4)] justify-end" onPress={() => setShowModal(false)}>
+            <Pressable className="rounded-t-[28px] p-6 gap-4 pb-10" style={{ backgroundColor: theme.surfaceElevated }} onPress={() => {}}>
+              <View className="w-9 h-[5px] rounded-full self-center mb-1" style={{ backgroundColor: theme.textTertiary }} />
+              <View className="items-center mb-1">
+                <View className="w-14 h-14 rounded-full items-center justify-center mb-3" style={{ backgroundColor: theme.primaryLight }}>
                   <Ionicons name="flag" size={28} color={theme.primary} />
                 </View>
-                <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>{editMode ? 'Edit Target' : 'Target Baru'}</Text>
-                <Text style={[styles.modalSubtitle, { color: theme.textSecondary }]}>{editMode ? 'Ubah target dan batas waktu' : 'Tentukan target dan batas waktu'}</Text>
+                <Text className="text-xl font-bold font-rounded-bold text-center" style={{ color: theme.textPrimary }}>{editMode ? 'Edit Target' : 'Target Baru'}</Text>
+                <Text className="text-sm font-rounded text-center mt-1" style={{ color: theme.textSecondary }}>{editMode ? 'Ubah target dan batas waktu' : 'Tentukan target dan batas waktu'}</Text>
               </View>
               <Input
                 label="Jumlah Target"
@@ -195,25 +206,26 @@ export default function TargetScreen() {
                 value={targetAmount}
                 onChangeText={setTargetAmount}
               />
-              <View style={{ gap: 8 }}>
+              <View className="gap-2">
                 <TouchableOpacity
                   onPress={() => setShowCalendar(true)}
-                  style={[styles.dateButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
+                  className="flex-row items-center gap-2.5 py-3.5 px-4 rounded-[14px] border"
+                  style={{ backgroundColor: theme.surface, borderColor: theme.border }}
                 >
                   <Ionicons name="calendar-outline" size={20} color={theme.primary} />
-                  <Text style={[styles.dateText, { color: selectedDate ? theme.textPrimary : theme.textTertiary }]}>
+                  <Text className="flex-1 text-[15px] font-rounded-medium" style={{ color: selectedDate ? theme.textPrimary : theme.textTertiary }}>
                     {selectedDate ? formatDate(selectedDate) : 'Pilih batas waktu'}
                   </Text>
                   <Ionicons name="chevron-down" size={16} color={theme.textTertiary} />
                 </TouchableOpacity>
 
                 {showCalendar && (
-                  <View style={[styles.calendar, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                    <View style={styles.calHeader}>
+                  <View className="rounded-[14px] border p-3 gap-2" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+                    <View className="flex-row items-center justify-between px-1">
                       <TouchableOpacity onPress={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1))}>
                         <Ionicons name="chevron-back" size={20} color={theme.primary} />
                       </TouchableOpacity>
-                      <Text style={[styles.calTitle, { color: theme.textPrimary }]}>
+                      <Text className="text-[15px] font-semibold font-rounded-semibold" style={{ color: theme.textPrimary }}>
                         {calendarMonth.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
                       </Text>
                       <TouchableOpacity onPress={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1))}>
@@ -221,13 +233,13 @@ export default function TargetScreen() {
                       </TouchableOpacity>
                     </View>
 
-                    <View style={styles.calWeekdays}>
+                    <View className="flex-row justify-around">
                       {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map((d) => (
-                        <Text key={d} style={[styles.calWeekday, { color: theme.textSecondary }]}>{d}</Text>
+                        <Text key={d} className="text-[11px] font-rounded-medium w-9 text-center" style={{ color: theme.textSecondary }}>{d}</Text>
                       ))}
                     </View>
 
-                    <View style={styles.calGrid}>
+                    <View className="flex-row flex-wrap">
                       {(() => {
                         const year = calendarMonth.getFullYear();
                         const month = calendarMonth.getMonth();
@@ -238,7 +250,7 @@ export default function TargetScreen() {
                         const cells: React.ReactNode[] = [];
 
                         for (let i = 0; i < firstDay; i++) {
-                          cells.push(<View key={`empty-${i}`} style={styles.calDay} />);
+                          cells.push(<View key={`empty-${i}`} className="w-9 h-9 items-center justify-center" />);
                         }
 
                         for (let d = 1; d <= daysInMonth; d++) {
@@ -253,13 +265,13 @@ export default function TargetScreen() {
                                 setSelectedDate(date);
                                 setShowCalendar(false);
                               }}
-                              style={[
-                                styles.calDay,
-                                isSelected && { backgroundColor: theme.primary, borderRadius: 8 },
-                                isPast && { opacity: 0.2 },
-                              ]}
+                              className={`w-9 h-9 items-center justify-center ${isSelected ? 'rounded-lg' : ''}`}
+                              style={{
+                                ...(isSelected ? { backgroundColor: theme.primary } : {}),
+                                ...(isPast ? { opacity: 0.2 } : {}),
+                              }}
                             >
-                              <Text style={[styles.calDayText, { color: isSelected ? '#FFF' : theme.textPrimary }]}>
+                              <Text className="text-sm font-rounded-medium" style={{ color: isSelected ? '#FFF' : theme.textPrimary }}>
                                 {d}
                               </Text>
                             </TouchableOpacity>,
@@ -272,13 +284,13 @@ export default function TargetScreen() {
                   </View>
                 )}
               </View>
-              <View style={styles.modalActions}>
-                <Button title="Batal" variant="ghost" onPress={() => setShowModal(false)} style={styles.modalButton} />
-                <Button title="Simpan" variant="primary" onPress={handleSetTarget} style={styles.modalButton} />
+              <View className="flex-row gap-3 mt-2">
+                <Button title="Batal" variant="ghost" onPress={() => setShowModal(false)} style={{ flex: 1 }} />
+                <Button title="Simpan" variant="primary" onPress={handleSetTarget} style={{ flex: 1 }} />
               </View>
             </Pressable>
-          </KeyboardAvoidingView>
-        </Pressable>
+          </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
 
       <ActionSheet
@@ -303,180 +315,3 @@ export default function TargetScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: {
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-    gap: 16,
-  },
-  header: {},
-  title: {
-    fontSize: 30,
-    fontWeight: '700',
-    fontFamily: 'SFProRounded-Bold',
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 14,
-    marginTop: 2,
-    fontFamily: 'SFProRounded-Regular',
-  },
-  infoCard: {},
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  infoIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: 'SFProRounded-Regular',
-    lineHeight: 20,
-  },
-  actions: {
-    gap: 12,
-  },
-  emptyState: {
-    alignItems: 'center',
-    marginTop: 32,
-  },
-  emptyIconWrapper: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    fontFamily: 'SFProRounded-Semibold',
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    fontFamily: 'SFProRounded-Regular',
-    marginBottom: 24,
-    lineHeight: 20,
-  },
-  createButton: {
-    width: '100%',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    padding: 24,
-    gap: 16,
-    paddingBottom: 40,
-  },
-  modalHandle: {
-    width: 36,
-    height: 5,
-    borderRadius: 2.5,
-    alignSelf: 'center',
-    marginBottom: 4,
-  },
-  modalHeader: {
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  modalIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    fontFamily: 'SFProRounded-Bold',
-    textAlign: 'center',
-  },
-  modalSubtitle: {
-    fontSize: 14,
-    fontFamily: 'SFProRounded-Regular',
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
-  },
-  modalButton: {
-    flex: 1,
-  },
-  dateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  dateText: {
-    flex: 1,
-    fontSize: 15,
-    fontFamily: 'SFProRounded-Medium',
-  },
-  calendar: {
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 12,
-    gap: 8,
-  },
-  calHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 4,
-  },
-  calTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    fontFamily: 'SFProRounded-Semibold',
-  },
-  calWeekdays: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  calWeekday: {
-    fontSize: 11,
-    fontFamily: 'SFProRounded-Medium',
-    width: 36,
-    textAlign: 'center',
-  },
-  calGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  calDay: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  calDayText: {
-    fontSize: 14,
-    fontFamily: 'SFProRounded-Medium',
-  },
-});

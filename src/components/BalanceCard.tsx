@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, ViewStyle } from "react-native";
+import { View, Text, ViewStyle } from "react-native";
 import { Balance } from "@/types";
 import { useTheme } from "@/context/ThemeContext";
 import { formatCurrency } from "@/utils/formatCurrency";
@@ -23,148 +23,45 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({ balance, style }) => {
 
   return (
     <Animated.View style={[cardStyle]}>
-      <View style={[styles.container, { backgroundColor: theme.primary }, style]}>
-        <View style={[styles.glow, { backgroundColor: 'rgba(255,255,255,0.08)' }]} />
-        <View style={[styles.glow2, { backgroundColor: 'rgba(255,255,255,0.05)' }]} />
+      <View
+        className="rounded-[28px] p-6 pt-5 overflow-hidden"
+        style={{ backgroundColor: theme.primary, shadowColor: theme.primary, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.35, shadowRadius: 24, elevation: 12, ...style }}
+      >
+        <View className="absolute -top-16 -right-10 w-[180px] h-[180px] rounded-[90px] bg-[rgba(255,255,255,0.08)]" />
+        <View className="absolute -bottom-20 -left-[50px] w-[250px] h-[250px] rounded-[125px] bg-[rgba(255,255,255,0.05)]" />
 
-        <View style={styles.topRow}>
-          <View style={styles.labelRow}>
-            <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+        <View className="flex-row justify-between items-center mb-2">
+          <View className="flex-row items-center gap-2">
+            <View className="w-7 h-7 rounded-full items-center justify-center bg-[rgba(255,255,255,0.2)]">
               <Ionicons name="wallet-outline" size={16} color="rgba(255,255,255,0.9)" />
             </View>
-            <Text style={styles.label}>Total Tabungan</Text>
+            <Text className="text-sm font-semibold font-rounded-semibold tracking-[0.3px] text-[rgba(255,255,255,0.8)]">Total Tabungan</Text>
           </View>
-          <View style={[styles.badge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-            <Text style={styles.badgeText}>IDR</Text>
+          <View className="px-2.5 py-1 rounded-lg bg-[rgba(255,255,255,0.2)]">
+            <Text className="text-[11px] font-bold font-rounded-bold tracking-[0.5px] text-[rgba(255,255,255,0.9)]">IDR</Text>
           </View>
         </View>
 
-        <Text style={styles.amount}>{formatCurrency(balance.current)}</Text>
+        <Text className="text-[44px] font-bold font-rounded-bold tracking-[-1px] text-white mb-1">
+          {formatCurrency(balance.current)}
+        </Text>
 
-        <View style={styles.divider} />
+        <View className="h-px my-4 bg-[rgba(255,255,255,0.15)]" />
 
-        <View style={styles.details}>
-          <View style={styles.detailItem}>
-            <Ionicons name="arrow-down-circle" size={18} color="#4CD964" />
-            <Text style={styles.detailLabel}>Pemasukan Hari Ini</Text>
-            <Text style={[styles.detailValue, { color: '#4CD964' }]}>{formatCurrency(balance.todayIncome)}</Text>
+        <View className="flex-row justify-between items-center">
+          <View className="flex-1 flex-col items-start gap-0.5">
+            <Ionicons name="arrow-down-circle" size={18} color={theme.income} />
+            <Text className="text-[11px] font-medium font-rounded-medium text-[rgba(255,255,255,0.6)]">Pemasukan Hari Ini</Text>
+            <Text className="text-[15px] font-bold font-rounded-bold" style={{ color: theme.income }}>{formatCurrency(balance.todayIncome)}</Text>
           </View>
-          <View style={styles.detailDivider} />
-          <View style={styles.detailItem}>
-            <Ionicons name="arrow-up-circle" size={18} color="#FF6B6B" />
-            <Text style={styles.detailLabel}>Pengeluaran Hari Ini</Text>
-            <Text style={[styles.detailValue, { color: '#FF6B6B' }]}>{formatCurrency(balance.todayExpense)}</Text>
+          <View className="w-px h-9 mx-4 bg-[rgba(255,255,255,0.15)]" />
+          <View className="flex-1 flex-col items-start gap-0.5">
+            <Ionicons name="arrow-up-circle" size={18} color={theme.expense} />
+            <Text className="text-[11px] font-medium font-rounded-medium text-[rgba(255,255,255,0.6)]">Pengeluaran Hari Ini</Text>
+            <Text className="text-[15px] font-bold font-rounded-bold" style={{ color: theme.expense }}>{formatCurrency(balance.todayExpense)}</Text>
           </View>
         </View>
       </View>
     </Animated.View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: 28,
-    padding: 24,
-    paddingTop: 20,
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.35,
-    shadowRadius: 24,
-    elevation: 12,
-    overflow: 'hidden',
-  },
-  glow: {
-    position: 'absolute',
-    top: -60,
-    right: -40,
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-  },
-  glow2: {
-    position: 'absolute',
-    bottom: -80,
-    left: -50,
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-  },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  iconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.8)",
-    fontFamily: "SFProRounded-Semibold",
-    letterSpacing: 0.3,
-  },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "rgba(255,255,255,0.9)",
-    fontFamily: "SFProRounded-Bold",
-    letterSpacing: 0.5,
-  },
-  amount: {
-    fontSize: 44,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    fontFamily: "SFProRounded-Bold",
-    letterSpacing: -1,
-    marginBottom: 4,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.15)",
-    marginVertical: 16,
-  },
-  details: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  detailItem: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    gap: 2,
-  },
-  detailDivider: {
-    width: 1,
-    height: 36,
-    backgroundColor: "rgba(255,255,255,0.15)",
-    marginHorizontal: 16,
-  },
-  detailLabel: {
-    fontSize: 11,
-    fontWeight: "500",
-    color: "rgba(255,255,255,0.6)",
-    fontFamily: "SFProRounded-Medium",
-  },
-  detailValue: {
-    fontSize: 15,
-    fontWeight: "700",
-    fontFamily: "SFProRounded-Bold",
-  },
-});

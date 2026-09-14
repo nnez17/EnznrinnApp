@@ -1,0 +1,22 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@import "nativewind/theme";
+
+/* Fase siklus haid — satu-satunya sumber warna fase (kalender, countdown, modal). */
+@theme {
+  --font-rounded: 'SFProRounded-Regular';
+  --font-rounded-medium: 'SFProRounded-Medium';
+  --font-rounded-semibold: 'SFProRounded-Semibold';
+  --font-rounded-bold: 'SFProRounded-Bold';
+
+  --color-phase-menstruation: #d9535c;
+  --color-phase-menstruation-bg: #fde8ea;
+  --color-phase-follicular: #4e9a3f;
+  --color-phase-follicular-bg: #eaf5e6;
+  --color-phase-ovulation: #b8860b;
+  --color-phase-ovulation-bg: #fdf6df;
+  --color-phase-luteal: #8a63b8;
+  --color-phase-luteal-bg: #f1ebf9;
+}

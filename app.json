@@ -1,21 +1,16 @@
 {
   "expo": {
-    "name": "SavingsApp",
-    "slug": "savingsapp",
-    "version": "1.0.0",
+    "name": "Enznrinn",
+    "slug": "enznrinn",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.savingsapp.app",
+      "bundleIdentifier": "com.enznrinn.app",
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Allow SavingsApp to use Face ID for authentication"
+        "NSFaceIDUsageDescription": "Allow Enznrinn to use Face ID for authentication"
       }
     },
     "android": {
@@ -23,7 +18,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.savingsapp.app"
+      "package": "com.enznrinn.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,6 +26,17 @@
     "plugins": [
       "expo-router",
       "expo-font",
+      "expo-updates",
+      "expo-secure-store",
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
       [
         "expo-build-properties",
         {
@@ -42,7 +48,16 @@
         }
       ]
     ],
-    "scheme": "savingsapp",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/9c8e90e5-bd07-4455-b4a3-cf5c090cc1ab",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 30000
+    },
+    "scheme": "enznrinn",
     "extra": {
       "router": {
         "origin": false

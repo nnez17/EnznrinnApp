@@ -6,9 +6,10 @@ import { Colors } from '@/context/colors';
 import { useTheme, useThemeScheme } from '@/context/ThemeContext';
 
 const tabIcons: Record<string, { focused: keyof typeof Ionicons.glyphMap; default: keyof typeof Ionicons.glyphMap }> = {
-  index: { focused: 'home', default: 'home-outline' },
-  history: { focused: 'time', default: 'time-outline' },
-  target: { focused: 'flag', default: 'flag-outline' },
+  '(tabungan)': { focused: 'wallet', default: 'wallet-outline' },
+  wishlist: { focused: 'gift', default: 'gift-outline' },
+  diary: { focused: 'book', default: 'book-outline' },
+  'period-tracker': { focused: 'fitness', default: 'fitness-outline' },
   settings: { focused: 'settings', default: 'settings-outline' },
 };
 
@@ -45,7 +46,7 @@ export default function TabLayout() {
             tabBarIcon: ({ focused, color }) => (
               <Ionicons
                 name={focused ? icons.focused : icons.default}
-                size={focused ? 28 : 26}
+                size={focused ? 26 : 24}
                 color={color}
               />
             ),
