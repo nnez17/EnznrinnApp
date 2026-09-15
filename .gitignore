@@ -23,6 +23,3 @@ backend/server
 
 #Logs
 *.log
-
-#npm
-.npmrc

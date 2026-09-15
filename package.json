@@ -3,6 +3,7 @@
   "version": "2.0.0",
   "main": "expo-router/entry",
   "scripts": {
+    "install:go": "cd backend && go mod download",
     "dev": "sh scripts/dev.sh",
     "dev:expo": "expo start",
     "dev:api": "go -C backend run ./cmd/server",
