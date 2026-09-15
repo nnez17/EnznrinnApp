@@ -42,7 +42,8 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Publish OTA update
-        run: npx eas update --branch production --message "OTA update from commit ${{ github.sha }}"
+        # `eas` dipasang global oleh expo-github-action; eas-cli bukan dependency lokal.
+        run: eas update --branch production --message "OTA update from commit ${{ github.sha }}"
 
       - name: Notify success
         if: success()
