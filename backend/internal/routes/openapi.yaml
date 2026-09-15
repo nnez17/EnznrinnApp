@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: enznrinn API
-  version: 1.0.0
+  version: 1.0.1
   description: Savings + diary + cycle tracker API
 tags:
   - { name: Users, description: App users }
@@ -17,7 +17,8 @@ x-tagGroups:
   - { name: Extended, tags: [Wishlist, Diary, Cycle] }
   - { name: System, tags: [System] }
 servers:
-  - url: http://localhost:8080
+  - url: https://enznrinn.nnez.my.id
+  # - url: http://localhost:8080
 components:
   schemas:
     Error:
