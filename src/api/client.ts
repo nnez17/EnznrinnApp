@@ -1,6 +1,8 @@
 // Thin fetch wrapper: base URL, headers, JSON, timeouts, error envelope parsing.
 // Backend errors arrive as {"error":{"code","message"}} (PRD §28).
 
+import { API_URL } from '@/config/env';
+
 export class ApiError extends Error {
   code: string;
   status: number;
@@ -10,8 +12,6 @@ export class ApiError extends Error {
     this.status = status;
   }
 }
-
-import { API_URL } from '@/config/env';
 
 const BASE_URL = API_URL.replace(/\/$/, '');
 const TIMEOUT_MS = 15000;

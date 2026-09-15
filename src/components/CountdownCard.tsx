@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useTheme } from '@/context/ThemeContext';
-import { CycleData, CyclePhase } from '@/types';
+import { CycleData } from '@/types';
 import { getCycleStatus, formatIndonesianDate } from '@/services/cycleService';
 import { PHASE_META } from '@/theme/phase';
 import Ionicons from '@expo/vector-icons/Ionicons';

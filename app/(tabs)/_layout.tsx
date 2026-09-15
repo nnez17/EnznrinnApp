@@ -2,7 +2,6 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Colors } from '@/context/colors';
 import { useTheme, useThemeScheme } from '@/context/ThemeContext';
 
 const tabIcons: Record<string, { focused: keyof typeof Ionicons.glyphMap; default: keyof typeof Ionicons.glyphMap }> = {

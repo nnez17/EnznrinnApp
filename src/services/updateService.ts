@@ -10,6 +10,8 @@ let Updates: any = {
 
 if (Platform.OS !== 'web') {
   try {
+    // Lazy require: expo-updates is native-only and must not load on web.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const expoUpdates = require('expo-updates');
     Updates = expoUpdates;
   } catch (e) {

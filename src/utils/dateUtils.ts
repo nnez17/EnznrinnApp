@@ -1,4 +1,4 @@
-import { format, parseISO, isValid, differenceInDays, addDays, startOfDay } from 'date-fns';
+import { format, parseISO, isValid, differenceInDays, startOfDay } from 'date-fns';
 import { id } from 'date-fns/locale';
 
 export const formatDate = (date: string | Date): string => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Platform } from 'react-native';
 import { useTheme } from '@/context/ThemeContext';
 import { CycleData } from '@/types';

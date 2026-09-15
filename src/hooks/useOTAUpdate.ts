@@ -95,8 +95,12 @@ export function useOTAUpdate() {
   }, [performCheck, stopPolling]);
 
   useEffect(() => {
-    performCheck();
-    startPolling();
+    // Defer initial check: performCheck() setState-synchronously, which in an
+    // effect body triggers cascading renders (react-hooks/set-state-in-effect).
+    const t = setTimeout(() => {
+      performCheck();
+      startPolling();
+    }, 0);
 
     const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {
       if (appStateRef.current.match(/inactive|background/) && nextState === 'active') {
@@ -106,6 +110,7 @@ export function useOTAUpdate() {
     });
 
     return () => {
+      clearTimeout(t);
       subscription.remove();
       stopPolling();
     };

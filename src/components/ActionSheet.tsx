@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Modal, Pressable, StyleSheet, Platform } from 'react-native';
+import { View, Text, Modal, Pressable, Platform } from 'react-native';
 import { useTheme } from '@/context/ThemeContext';
 
 interface ActionSheetOption {

@@ -4,49 +4,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useSavings } from '@/context/SavingsContext';
-import { Colors } from '@/context/colors';
 import { useTheme } from '@/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getCurrentVersion } from '@/services/updateService';
 
-
-function SettingRow({
-  icon, label, value, onPress, theme, destructive, isLast, rightIcon,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  value?: string;
-  onPress?: () => void;
-  theme: typeof Colors.light;
-  destructive?: boolean;
-  isLast?: boolean;
-  rightIcon?: keyof typeof Ionicons.glyphMap;
-}) {
-  return (
-    <TouchableOpacity
-      className="flex-row items-center py-[13px] px-4 gap-3"
-      style={[
-        { backgroundColor: theme.surfaceElevated },
-        !isLast && { borderBottomWidth: 0.5, borderBottomColor: theme.separator },
-      ]}
-      onPress={onPress}
-      disabled={!onPress}
-      activeOpacity={0.7}
-    >
-      <View className="w-8 h-8 rounded-[10px] items-center justify-center" style={{ backgroundColor: destructive ? '#FF3B3015' : theme.primaryLight }}>
-        <Ionicons name={icon} size={18} color={destructive ? '#FF3B30' : theme.primary} />
-      </View>
-      <Text className="flex-1 text-[15px] font-medium font-rounded-medium" style={{ color: destructive ? '#FF3B30' : theme.textPrimary }}>
-        {label}
-      </Text>
-      {value && <Text className="text-[13px] font-rounded max-w-[120px] text-right" style={{ color: theme.textSecondary }}>{value}</Text>}
-      {(onPress || rightIcon) && !destructive &&
-        <Ionicons name={rightIcon || 'chevron-forward'} size={16} color={theme.textTertiary} />
-      }
-    </TouchableOpacity>
-  );
-}
 
 const themeOptions: { key: 'light' | 'dark' | 'kharin'; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
   { key: 'light', icon: 'sunny-outline', label: 'Terang' },
