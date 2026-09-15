@@ -240,7 +240,7 @@ export default function DiaryScreen() {
       )}
 
       <Modal visible={showEditor} transparent animationType="slide" statusBarTranslucent onRequestClose={() => setShowEditor(false)}>
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <Pressable className="flex-1 bg-[rgba(0,0,0,0.4)] justify-end" onPress={() => setShowEditor(false)}>
             <Pressable className="rounded-t-[28px] p-6 gap-4 pb-10" style={{ backgroundColor: theme.surfaceElevated }} onPress={() => {}}>
               <View className="w-9 h-[5px] rounded-full self-center mb-1" style={{ backgroundColor: theme.textTertiary }} />

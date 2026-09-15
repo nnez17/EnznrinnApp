@@ -190,7 +190,7 @@ export default function DashboardScreen() {
       <Modal visible={!!modalType} transparent animationType="slide" statusBarTranslucent onRequestClose={() => setModalType(null)}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <Pressable className="flex-1 bg-[rgba(0,0,0,0.4)] justify-end" onPress={() => setModalType(null)}>
             <Pressable className="rounded-t-[28px] p-6 gap-3.5 pb-10" style={{ backgroundColor: theme.surfaceElevated }} onPress={() => {}}>
